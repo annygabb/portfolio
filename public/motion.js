@@ -5,7 +5,7 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
   gsap.registerPlugin(ScrollTrigger);
   const media=gsap.matchMedia();
   let disposed=false;
-  media.add({desktop:'(min-width: 901px) and (pointer: fine)',motion:'(prefers-reduced-motion: no-preference)'}, context=>{
+  media.add({desktop:'(min-width: 901px) and (pointer: fine)',staged:'(min-width: 901px) and (min-height: 700px) and (pointer: fine)',motion:'(prefers-reduced-motion: no-preference)'}, context=>{
     if(!context.conditions.motion) return noop;
     const desktop=context.conditions.desktop;
     let lenis, tick, projectTweens=[];
@@ -39,8 +39,11 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
       if(desktop)gsap.to(portrait,{y:-34,rotationY:-7,rotationX:4,z:28,ease:'none',scrollTrigger:{trigger:'.identity-hero',start:'top top',end:'bottom top',scrub:0.8}});
     }
     if(desktop){
-      const watermark=doc.querySelector('.hero-watermark');
-      if(watermark)gsap.to(watermark,{xPercent:-8,y:75,ease:'none',scrollTrigger:{trigger:'.hero-canvas',start:'top top',end:'bottom top',scrub:1}});
+      const layers=doc.querySelector('[data-parallax-layers]');
+      if(layers)for(const [layer,speed] of [[1,70],[2,55],[3,40],[4,10]]){
+        const elements=layers.querySelectorAll(`[data-parallax-layer="${layer}"]`);
+        if(elements.length)gsap.to(elements,{yPercent:speed,ease:'none',scrollTrigger:{trigger:layers,start:'top top',end:'bottom top',scrub:0.5}});
+      }
     }
     for(const bar of doc.querySelectorAll('.score-fill')){
       gsap.from(bar,{scaleX:0,duration:1.1,ease:'power2.out',scrollTrigger:{trigger:bar,start:'top 94%',once:true},clearProps:'transform'});
@@ -50,8 +53,13 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
     }
     const refreshProjects=()=>{
       projectTweens.forEach(tween=>tween.revert());projectTweens=[];
-      for(const frame of doc.querySelectorAll('.project-card:not([hidden]) .project-image, .case-cover > img')){
-        projectTweens.push(gsap.fromTo(frame,{rotationX:desktop?7:0,y:desktop?22:10,scale:desktop?0.97:0.99},{rotationX:0,y:0,scale:1,ease:'none',transformOrigin:'50% 50%',scrollTrigger:{trigger:frame.parentElement,start:'clamp(top 96%)',end:'clamp(center 67%)',scrub:0.7,invalidateOnRefresh:true}}));
+      const stages=[...doc.querySelectorAll('.project-stage:not([hidden])')];
+      if(context.conditions.staged)stages.slice(0,-1).forEach((stage,index)=>{
+        const screen=stage.querySelector('.project-screen');
+        if(screen)projectTweens.push(gsap.to(screen,{scale:0.94,opacity:0.35,rotationX:-3,ease:'none',transformOrigin:'50% 0%',scrollTrigger:{trigger:stages[index+1],start:'top bottom',end:'top top',scrub:0.6,invalidateOnRefresh:true}}));
+      });
+      for(const frame of doc.querySelectorAll('.case-cover > img')){
+        projectTweens.push(gsap.fromTo(frame,{y:desktop?22:10,scale:0.98},{y:0,scale:1,ease:'none',scrollTrigger:{trigger:frame.parentElement,start:'clamp(top 96%)',end:'clamp(center 67%)',scrub:0.7,invalidateOnRefresh:true}}));
       }
       lenis?.resize?.();ScrollTrigger.refresh();
     };

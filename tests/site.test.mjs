@@ -54,12 +54,14 @@ test('product cases explain frontend and backend contributions separately',()=>{
   assert.match(html,/Front-end/);assert.match(html,/Back-end/);
  }
 });
-test('evidence chart preserves all four scores and their limitations',()=>{
+test('revised home preserves evidence values and removes the investment section',()=>{
  for(const prefix of ['','en/']){
   const html=readFileSync(`dist/${prefix}index.html`,'utf8');
-  const values=[...html.matchAll(/class="score-fill tone-\d"><\/i><\/div><b>(\d+)<\/b>/g)].map(m=>Number(m[1]));
-  assert.deepEqual(values,[98,100,100,100,100,100,100,100,100,94,100,100]);
-  assert.match(html,/baseline/);assert.match(html,/id="contratar"/);
-  assert.match(html,prefix?/Custom quote/:/Sob orçamento/);
+  assert.ok(!html.includes('id="contratar"'));
+  assert.ok(!html.includes('hero-profile-strip'));
+  assert.equal((html.match(/class="project-card project-stage/g)||[]).length,7);
+  assert.ok(html.includes('data-parallax-layers'));
+  assert.ok(html.includes('<td>94</td>'));
+  for(const slug of ['pagespeed-seo-optimizer','orquestrador-de-sites'])assert.ok(html.includes(`<details class="tool-detail" id="tool-${slug}">`));
  }
 });

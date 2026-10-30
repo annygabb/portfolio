@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mountMotion} from '../public/motion.js';
-function fixture({reduce=false,desktop=true}={}){
+function fixture({reduce=false,desktop=true,shortViewport=false}={}){
  const classes=new Set(),listeners=new Map(),ticks=new Set(),state={created:0,destroyed:0,frames:[],refresh:0,reverted:0,resets:0,stops:0,starts:0};
  const root={classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}};
  const doc={documentElement:root,querySelector:()=>null,querySelectorAll:()=>[],addEventListener:(k,v)=>listeners.set(k,v),removeEventListener:(k)=>listeners.delete(k)};
  const win={location:{href:'https://portfolio.example/'},matchMedia:q=>({matches:q.includes('reduced-motion')?reduce:desktop}),addEventListener(){},removeEventListener(){}};
  const ScrollTrigger={update(){},refresh(){state.refresh++}};
- const gsap={registerPlugin(){},ticker:{add:f=>ticks.add(f),remove:f=>ticks.delete(f),lagSmoothing(){}},matchMedia(){return {add(q,fn){this.cleanup=fn({conditions:{desktop,motion:!reduce},add:(name,fn)=>fn()})},revert(){state.reverted++;this.cleanup?.()}}},from(){return {revert(){}}},fromTo(){return {revert(){}}},to(){return {revert(){}}}};
+ const gsap={registerPlugin(){},ticker:{add:f=>ticks.add(f),remove:f=>ticks.delete(f),lagSmoothing(){}},matchMedia(){return {add(q,fn){const context={conditions:{desktop,staged:desktop&&!shortViewport,motion:!reduce}};context.add=(name,method)=>{context[name]=method};this.cleanup=fn(context)},revert(){state.reverted++;this.cleanup?.()}}},from(){return {revert(){}}},fromTo(){return {revert(){}}},to(){return {revert(){}}}};
  class Lenis{constructor(options){state.created++;state.options=options}on(){}off(){}raf(t){state.frames.push(t)}stop(){state.stops++}start(){state.starts++}reset(){state.resets++}destroy(){state.destroyed++}}
  return {win,doc,gsap,ScrollTrigger,Lenis,ticks,listeners,state,classes};
 }
@@ -47,4 +47,19 @@ test('opening a proof dialog stops background scrolling and closing resumes it',
  f.listeners.get('portfolio:dialog')?.({detail:{open:false}});
  assert.equal(f.state.starts,1);
  cleanup();assert.equal(f.listeners.has('portfolio:dialog'),false);
+});
+
+test('project transitions follow the next visible project and clean up on disposal',()=>{
+ const f=fixture(),screenA={},screenB={},a={querySelector:()=>screenA},b={querySelector:()=>screenB};
+ const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[a,b]:original(q);
+ const recorded=[];let reverted=0;f.gsap.to=(target,vars)=>{recorded.push({target,vars});return {revert(){reverted++}}};
+ const cleanup=mountMotion(f);assert.equal(recorded.length,1);assert.equal(recorded[0].target,screenA);assert.equal(recorded[0].vars.scrollTrigger.trigger,b);
+ cleanup();assert.equal(reverted,1);
+});
+
+test('short desktop windows keep project content fully visible in natural scrolling',()=>{
+ const f=fixture({shortViewport:true}),a={querySelector:()=>({})},b={querySelector:()=>({})};
+ const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[a,b]:original(q);
+ let transitions=0;f.gsap.to=()=>{transitions++;return {revert(){}}};
+ const cleanup=mountMotion(f);assert.equal(transitions,0);assert.equal(f.state.created,1);cleanup();
 });

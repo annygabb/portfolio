@@ -54,3 +54,10 @@ dialog?.addEventListener('close', () => {
   document.dispatchEvent(new CustomEvent('portfolio:dialog',{detail:{open:false}}));
   previousFocus?.focus();
 });
+// Expand tools in place and preserve native hash navigation.
+function openTool(id){const panel=document.getElementById?.(id);if(panel?.tagName==='DETAILS'){panel.open=true;document.dispatchEvent(new CustomEvent('portfolio:layout'));}}
+for(const link of document.querySelectorAll('[data-open-tool]'))link.addEventListener('click',event=>{
+ if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
+ openTool(link.dataset.openTool);
+});
+if(typeof window.location?.hash==='string' && window.location.hash.startsWith('#tool-'))openTool(window.location.hash.slice(1));
