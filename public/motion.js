@@ -54,10 +54,10 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
     const refreshProjects=()=>{
       projectTweens.forEach(tween=>tween.revert());projectTweens=[];
       const stages=[...doc.querySelectorAll('.project-stage:not([hidden])')];
-      if(context.conditions.staged)stages.slice(0,-1).forEach((stage,index)=>{
-        const screen=stage.querySelector('.project-screen');
-        if(screen)projectTweens.push(gsap.to(screen,{scale:0.94,opacity:0.35,rotationX:-3,ease:'none',transformOrigin:'50% 0%',scrollTrigger:{trigger:stages[index+1],start:'top bottom',end:()=>`top top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,scrub:0.6,invalidateOnRefresh:true}}));
-      });
+      if(context.conditions.staged)for(const stage of stages){
+        const screen=stage.querySelector('.project-screen'), visual=stage.querySelector('.stage-visual');
+        if(screen&&visual)projectTweens.push(gsap.fromTo(visual,{yPercent:4,scale:0.96},{yPercent:-5,scale:1.035,ease:'none',scrollTrigger:{trigger:screen,start:()=>`top top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,end:()=>`+=${Math.round(win.innerHeight*.85)}`,pin:screen,pinSpacing:true,scrub:0.7,invalidateOnRefresh:true}}));
+      }
       for(const frame of doc.querySelectorAll('.case-cover > img')){
         projectTweens.push(gsap.fromTo(frame,{y:desktop?22:10,scale:0.98},{y:0,scale:1,ease:'none',scrollTrigger:{trigger:frame.parentElement,start:'clamp(top 96%)',end:'clamp(center 67%)',scrub:0.7,invalidateOnRefresh:true}}));
       }

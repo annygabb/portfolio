@@ -19,7 +19,7 @@ for(const lang of ['pt','en']) for(const slug of [null,...slugs]) {
   assert.match(html,/<main\b/); assert.match(html,/prefers-color-scheme|theme-init/);
   for(const m of html.matchAll(/(?:href|src)="([^"]+)"/g)) {
    const url=m[1]; if(!url.startsWith('/') || url.startsWith('//')) continue;
-   const [file,fragment]=url.split('#');
+   const parsed=new URL(url,'https://portfolio.example');const file=parsed.pathname,fragment=parsed.hash.slice(1);
    let target=resolve('dist','.'+(file||route));
    if(existsSync(target)&&statSync(target).isDirectory())target=join(target,'index.html');
    assert.ok(existsSync(target),`broken link ${url} in ${route}`);
@@ -64,6 +64,36 @@ test('revised home preserves evidence values and removes the investment section'
   assert.equal((html.match(/class="project-card project-stage/g)||[]).length,7);
   assert.ok(html.includes('data-parallax-layers'));
   assert.ok(html.includes('<td>94</td>'));
-  for(const slug of ['pagespeed-seo-optimizer','orquestrador-de-sites'])assert.ok(html.includes(`<details class="tool-detail" id="tool-${slug}">`));
+  for(const slug of ['pagespeed-seo-optimizer','orquestrador-de-sites'])assert.ok(html.includes(`<details class="tool-detail project-tool-detail container" id="tool-${slug}" open>`));
  }
+});
+
+test('tool evidence belongs to each project, with no duplicate method or quality sections',()=>{
+ for(const prefix of ['','en/']){
+  const html=readFileSync(`dist/${prefix}index.html`,'utf8');
+  assert.ok(!html.includes('class="toolbox'));assert.ok(!html.includes('class="evidence-section'));
+  assert.ok(!html.includes('Passe o mouse ou navegue'));assert.ok(!html.includes('Hover or use the keyboard'));
+  assert.ok(!html.includes('<details class="earlier"'));
+  assert.ok(html.includes('class="earlier-history"'));
+  for(const slug of ['pagespeed-seo-optimizer','orquestrador-de-sites']){
+   const start=html.indexOf(`aria-labelledby="project-${slug}"`),end=html.indexOf('</article>',html.indexOf('class="tool-decisions"',start));
+   assert.ok(html.slice(start,end).includes(`id="tool-${slug}"`));
+   assert.equal((html.match(new RegExp(`id="tool-${slug}"`,'g'))||[]).length,1);
+  }
+  assert.match(html,/<a[^>]*data-nav="curriculo"[^>]*>CV<\/a>/);
+ }
+});
+test('language selector identifies the current language and links explicitly to both equivalent routes',()=>{
+ for(const prefix of ['','en/']){
+  const html=readFileSync(`dist/${prefix}index.html`,'utf8');
+  const switcher=html.match(/<nav class="locale-switch"[\s\S]*?<\/nav>/)[0];
+  assert.match(switcher,/<a[^>]*href="\/"[^>]*lang="pt-BR"[^>]*>PT<\/a>/);
+  assert.match(switcher,/<a[^>]*href="\/en\/"[^>]*lang="en"[^>]*>EN<\/a>/);
+  assert.match(switcher,prefix?/<a[^>]*lang="en"[^>]*aria-current="page"[^>]*>EN/:/<a[^>]*lang="pt-BR"[^>]*aria-current="page"[^>]*>PT/);
+ }
+});
+
+test('published pages version CSS and behavior assets so browsers request updated files',()=>{
+ const html=readFileSync('dist/index.html','utf8');
+ for(const file of ['styles.css','app.js','motion.js','section-navigation.js'])assert.ok(new RegExp(`/${file.replaceAll('.','\\.')}\\?v=[a-f0-9]{12}`).test(html));
 });

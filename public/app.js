@@ -24,14 +24,14 @@ document.querySelectorAll('.main-nav a').forEach(a => a.addEventListener('click'
 document.addEventListener('keydown', e => { if(e.key==='Escape' && document.documentElement.classList.contains('menu-open')) { closeMenu(); menu?.focus(); } });
 document.addEventListener('click', e => { if(!e.target.closest('.site-header')) closeMenu(); });
 const cards = [...document.querySelectorAll('.project-card')];
-for(const button of document.querySelectorAll('[data-filter]')) button.addEventListener('click', () => {
-  const value = button.dataset.filter;
-  document.querySelectorAll('[data-filter]').forEach(el => el.setAttribute('aria-pressed', String(el === button)));
-  for(const card of cards) card.hidden = value !== 'all' && card.dataset.kind !== value;
-  const status = document.querySelector('.filter-status');
-  if(status) status.textContent = labels.count(cards.filter(el => !el.hidden).length);
+function applyProjectFilter(value){
+  document.querySelectorAll('[data-filter]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.filter===value)));
+  for(const card of cards)card.hidden=value!=='all'&&card.dataset.kind!==value;
+  const status=document.querySelector('.filter-status');
+  if(status)status.textContent=labels.count(cards.filter(el=>!el.hidden).length);
   document.dispatchEvent(new CustomEvent('portfolio:layout'));
-});
+}
+for(const button of document.querySelectorAll('[data-filter]'))button.addEventListener('click',()=>applyProjectFilter(button.dataset.filter));
 document.querySelector('.copy-email')?.addEventListener('click', async () => {
   const status = document.querySelector('.copy-status');
   try { await navigator.clipboard.writeText('annygabbyoficial@gmail.com'); status.textContent = labels.copied; }
@@ -55,7 +55,7 @@ dialog?.addEventListener('close', () => {
   previousFocus?.focus();
 });
 // Expand tools in place and preserve native hash navigation.
-function openTool(id){const panel=document.getElementById?.(id);if(panel?.tagName==='DETAILS'){panel.open=true;document.dispatchEvent(new CustomEvent('portfolio:layout'));}}
+function openTool(id){const panel=document.getElementById?.(id);if(panel?.tagName==='DETAILS'){panel.open=true;if(panel.closest?.('.project-stage')?.hidden)applyProjectFilter('all');else document.dispatchEvent(new CustomEvent('portfolio:layout'));}}
 for(const link of document.querySelectorAll('[data-open-tool]'))link.addEventListener('click',event=>{
  if(event.ctrlKey||event.metaKey||event.shiftKey||event.altKey)return;
  openTool(link.dataset.openTool);

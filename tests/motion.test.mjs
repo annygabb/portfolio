@@ -49,17 +49,17 @@ test('opening a proof dialog stops background scrolling and closing resumes it',
  cleanup();assert.equal(f.listeners.has('portfolio:dialog'),false);
 });
 
-test('project transitions follow the next visible project and clean up on disposal',()=>{
- const f=fixture(),screenA={},screenB={},a={querySelector:()=>screenA},b={querySelector:()=>screenB};
- const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[a,b]:original(q);
- const recorded=[];let reverted=0;f.gsap.to=(target,vars)=>{recorded.push({target,vars});return {revert(){reverted++}}};
- const cleanup=mountMotion(f);assert.equal(recorded.length,1);assert.equal(recorded[0].target,screenA);assert.equal(recorded[0].vars.scrollTrigger.trigger,b);
+test('project scenes pin the viewport while animating their visual child and clean up',()=>{
+ const f=fixture(),screen={},visual={},stage={querySelector:q=>q==='.project-screen'?screen:visual};
+ const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
+ const recorded=[];let reverted=0;f.gsap.fromTo=(target,from,to)=>{recorded.push({target,from,to});return {revert(){reverted++}}};
+ const cleanup=mountMotion(f);assert.equal(recorded.length,1);assert.equal(recorded[0].target,visual);assert.equal(recorded[0].to.scrollTrigger.pin,screen);assert.equal(recorded[0].to.scrollTrigger.pinSpacing,true);
  cleanup();assert.equal(reverted,1);
 });
 
 test('short desktop windows keep project content fully visible in natural scrolling',()=>{
  const f=fixture({shortViewport:true}),a={querySelector:()=>({})},b={querySelector:()=>({})};
  const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[a,b]:original(q);
- let transitions=0;f.gsap.to=()=>{transitions++;return {revert(){}}};
+ let transitions=0;f.gsap.fromTo=()=>{transitions++;return {revert(){}}};
  const cleanup=mountMotion(f);assert.equal(transitions,0);assert.equal(f.state.created,1);cleanup();
 });

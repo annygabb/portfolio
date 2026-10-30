@@ -2,16 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
-function fixture({withTool=false}={}){
+function fixture({withTool=false,filteredTool=false}={}){
  let active=null;
  const element=(attrs={})=>({hidden:false,attributes:{...attrs},events:{},setAttribute(k,v){this.attributes[k]=v},getAttribute(k){return this.attributes[k]},addEventListener(k,fn){this.events[k]=fn},focus(){active=this}});
  const menu=element({'aria-expanded':'false'}),firstLink=element(),theme=element();
  const tool=element();tool.tagName='DETAILS';tool.open=false;const toolLink=element();toolLink.dataset={openTool:'tool-pagespeed-seo-optimizer'};
+ const toolStage=element();toolStage.hidden=filteredTool;toolStage.dataset={kind:'tool'};tool.closest=()=>toolStage;
+ const allFilter=element();allFilter.dataset={filter:'all'};const sitesFilter=element();sitesFilter.dataset={filter:'website'};
  const classes=new Set();
  const root={dataset:{theme:'light'},classList:{toggle(k,on){if(on)classes.add(k);else classes.delete(k)},remove(k){classes.delete(k)},contains(k){return classes.has(k)}}};
- const doc={body:{dataset:{lang:'pt'}},documentElement:root,querySelector(q){return ({'.menu-toggle':menu,'.main-nav a':firstLink,'.theme-toggle':theme})[q]??null},querySelectorAll(q){return q==='.main-nav a'?[firstLink]:q==='[data-open-tool]'&&withTool?[toolLink]:[]},getElementById(id){return id==='tool-pagespeed-seo-optimizer'?tool:null},dispatchEvent(event){this.lastEvent=event},events:{},addEventListener(k,fn){this.events[k]=fn}};
+ const doc={body:{dataset:{lang:'pt'}},documentElement:root,querySelector(q){return ({'.menu-toggle':menu,'.main-nav a':firstLink,'.theme-toggle':theme})[q]??null},querySelectorAll(q){return q==='.main-nav a'?[firstLink]:q==='[data-open-tool]'&&withTool?[toolLink]:q==='.project-card'&&filteredTool?[toolStage]:q==='[data-filter]'&&filteredTool?[allFilter,sitesFilter]:[]},getElementById(id){return id==='tool-pagespeed-seo-optimizer'?tool:null},dispatchEvent(event){this.lastEvent=event},events:{},addEventListener(k,fn){this.events[k]=fn}};
  runInNewContext(readFileSync('public/app.js','utf8'),{document:doc,window:{},CustomEvent:class{constructor(type){this.type=type}},navigator:{},localStorage:{setItem(){throw Error('denied')}},matchMedia:()=>({matches:true})});
- return {menu,firstLink,theme,root,doc,tool,toolLink,get active(){return active}};
+ return {menu,firstLink,theme,root,doc,tool,toolLink,toolStage,allFilter,sitesFilter,get active(){return active}};
 }
 test('opening mobile navigation focuses its first link for forward keyboard navigation',()=>{
  const f=fixture();f.menu.focus();f.menu.events.click();
@@ -33,4 +35,10 @@ test('tool links expand the intended inline details panel',()=>{
 });
 test('modified tool navigation preserves the browser new-tab action',()=>{
  const f=fixture({withTool:true});f.toolLink.events.click({ctrlKey:true});assert.equal(f.tool.open,false);
+});
+
+test('tool navigation clears a hiding filter and synchronizes controls before the native hash jump',()=>{
+ const f=fixture({withTool:true,filteredTool:true});f.sitesFilter.events.click();assert.equal(f.toolStage.hidden,true);
+ f.toolLink.events.click({});assert.equal(f.tool.open,true);assert.equal(f.toolStage.hidden,false);
+ assert.equal(f.allFilter.getAttribute('aria-pressed'),'true');assert.equal(f.sitesFilter.getAttribute('aria-pressed'),'false');assert.equal(f.doc.lastEvent.type,'portfolio:layout');
 });

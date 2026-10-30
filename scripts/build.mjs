@@ -1,3 +1,4 @@
+import {createHash} from 'node:crypto';
 import {mkdir,writeFile,cp,rm,readFile} from 'node:fs/promises';
 import {renderPage} from '../src/render.mjs';
 import {projects,owner} from '../src/content.mjs';
@@ -15,11 +16,13 @@ for(const [source,target] of [
  await writeFile('dist/vendor/'+target,content.replace(/\/\/# sourceMappingURL=.*$/gm,''));
 }
 await writeFile('dist/vendor/THIRD-PARTY.txt','GSAP 3.15.0 and ScrollTrigger: Copyright GreenSock. Standard license https://gsap.com/standard-license. Original copyright headers preserved.\nLenis 1.3.27: MIT, darkroom.engineering. See Lenis-LICENSE.txt.\n');
+const assetRevisions=await Promise.all(['styles.css','app.js','theme-init.js','motion.js','section-navigation.js'].map(async file=>[file,createHash('sha256').update(await readFile('public/'+file)).digest('hex').slice(0,12)]));
 const routes=[];
 for(const lang of ['pt','en']) for(const project of [null,...projects]){
  const route=(lang==='en'?'/en/':'/')+(project?`cases/${project.slug}/`:'');
  const directory='dist'+route;await mkdir(directory,{recursive:true});
- await writeFile(directory+'index.html',renderPage({lang,project}));routes.push({route,lang,project});
+ let html=renderPage({lang,project});for(const [file,revision] of assetRevisions)html=html.replaceAll(`"/${file}"`,`"/${file}?v=${revision}"`);
+ await writeFile(directory+'index.html',html);routes.push({route,lang,project});
 }
 const urls=routes.map(({route})=>`<url><loc>${owner.site}${route}</loc></url>`).join('');
 await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`);
