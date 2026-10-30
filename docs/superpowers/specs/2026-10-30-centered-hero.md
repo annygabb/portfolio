@@ -9,3 +9,11 @@ Foto: ferramenta imagegen usada para remover fundo, com prompt de preservação 
 Anton hospedada localmente em WOFF, licença OFL preservada. Manrope e Pinyon permanecem. Layout mobile reorganiza o retrato acima da identificação lateral; movimento reduzido e fallback sem scripts mantidos. Camada animada do retrato não controla o posicionamento central, evitando conflito com transform de alinhamento.
 
 Validação automatizada de rotas/links/ativos e demais comportamentos permanece. Visualização autenticada da prévia continua pendente; não declarar fidelidade visual verificada em navegador.
+
+## Correção após feedback: menos ruído e foto original
+
+Removidos do hero a faixa com três colunas/cards, os contadores, a segunda ação de currículo e os textos repetidos. Hero fica com masthead curto, palavra de fundo, retrato, nome/atuação, assinatura e uma chamada para projetos. Currículo continua na seção própria.
+
+O derivado de imagegen foi substituído no HTML pelo JPEG original de 400 × 400, sem reprocessar seus pixels. A apresentação usa um clipPath vetorial de silhueta e drop-shadow no invólucro; não há reconstrução generativa do rosto. Exibição em desktop limitada à largura original de 400px, menor no mobile. Esse recorte vetorial pode simplificar fios de cabelo na borda; não constitui recuperação de resolução inexistente no arquivo de origem. Sombra suave também na transição do hero, sem cards novos.
+
+32 testes aprovados após a correção. Inspeção visual autenticada continua pendente.

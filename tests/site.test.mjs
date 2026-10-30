@@ -43,7 +43,7 @@ test('home introduces Anny before work, skills and résumé in both languages',(
   assert.ok(ids.every(i=>i>=0),'all requested sections exist');
   assert.ok(ids.every((v,i)=>!i||v>ids[i-1]),'requested reading order');
   assert.match(html,/<h1[^>]*>[\s\S]*?Anny[\s\S]*?<\/h1>/);
-  assert.match(html,/<img[^>]*src="\/assets\/anny-cutout.webp"[^>]*width="900"[^>]*height="900"/);
+  assert.match(html,/<img[^>]*src="\/assets\/anny-original.jpg"[^>]*width="400"[^>]*height="400"/);
   assert.match(html,/<a[^>]*href="\/assets\/Anny-Gabrielly-Curriculo.pdf"[^>]*download/);
  }
 });
