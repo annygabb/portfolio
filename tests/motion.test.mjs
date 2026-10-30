@@ -8,7 +8,7 @@ function fixture({reduce=false,desktop=true,shortViewport=false}={}){
  const win={location:{href:'https://portfolio.example/'},matchMedia:q=>({matches:q.includes('reduced-motion')?reduce:desktop}),addEventListener(){},removeEventListener(){},clearTimeout(){},setTimeout:fn=>{fn();return 1}};
  const ScrollTrigger={update(){},refresh(){state.refresh++}};
  const gsap={registerPlugin(){},ticker:{add:f=>ticks.add(f),remove:f=>ticks.delete(f),lagSmoothing(){}},matchMedia(){return {add(q,fn){const context={conditions:{desktop,staged:!shortViewport,motion:!reduce}};context.add=(name,method)=>{context[name]=method};this.cleanup=fn(context)},revert(){state.reverted++;this.cleanup?.()}}},from(){return {revert(){}}},fromTo(){return {revert(){}}},to(){return {revert(){}}}};
- class Lenis{constructor(options){state.created++;state.options=options}on(){}off(){}raf(t){state.frames.push(t)}stop(){state.stops++}start(){state.starts++}reset(){state.resets++}destroy(){state.destroyed++}}
+ class Lenis{constructor(options){state.created++;state.options=options}on(){}off(){}raf(t){state.frames.push(t)}stop(){state.stops++}start(){state.starts++}scrollTo(y){state.restoredY=y}reset(){state.resets++}destroy(){state.destroyed++}}
  return {win,doc,gsap,ScrollTrigger,Lenis,ticks,listeners,state,classes};
 }
 test('reduced motion skips smooth scrolling and ticker registration',()=>{
@@ -49,12 +49,15 @@ test('opening a proof dialog stops background scrolling and closing resumes it',
  cleanup();assert.equal(f.listeners.has('portfolio:dialog'),false);
 });
 
-test('project scenes pin the viewport while animating their visual child and clean up',()=>{
- const f=fixture(),screen={},visual={},stage={querySelector:q=>q==='.project-screen'?screen:q==='.stage-visual'?visual:null};
- const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
+test('project screens overlap in perspective while the fixed container itself is never transformed',()=>{
+ const f=fixture(),screen={},visual={},scene={},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:q==='.stage-visual'?visual:null};
+ const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage,stage]:original(q);
  const recorded=[];let reverted=0;f.gsap.fromTo=(target,from,to)=>{recorded.push({target,from,to});return {revert(){reverted++}}};
- const cleanup=mountMotion(f);assert.equal(recorded.length,1);assert.equal(recorded[0].target,visual);assert.equal(recorded[0].to.scrollTrigger.pin,screen);assert.equal(recorded[0].to.scrollTrigger.pinSpacing,true);
- cleanup();assert.equal(reverted,1);
+ const cleanup=mountMotion(f);
+ const entries=recorded.filter(x=>x.target===scene&&x.from.z<0),pins=recorded.filter(x=>x.to.scrollTrigger.pin);
+ assert.equal(entries.length,2);assert.ok(entries.every(x=>x.from.rotationX>0&&x.from.rotationY!==0&&x.to.z===0));
+ assert.ok(recorded.every(x=>x.target!==screen));assert.equal(pins[0].to.scrollTrigger.pin,screen);assert.equal(pins[0].to.scrollTrigger.pinSpacing,false);assert.equal(pins[1].to.scrollTrigger.pinSpacing,true);
+ assert.ok(pins[0].to.z<0&&pins[0].to.rotationX<0);cleanup();assert.equal(reverted,recorded.length);
 });
 
 test('short desktop windows keep project content fully visible in natural scrolling',()=>{
@@ -82,5 +85,25 @@ test('resize reevaluates whether a project still fits before rebuilding its pin'
  const callbacks=new Map();f.win.addEventListener=(name,fn)=>callbacks.set(name,fn);f.win.removeEventListener=name=>callbacks.delete(name);
  const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
  let pins=0,reverts=0;f.gsap.fromTo=(target,from,to)=>{if(to.scrollTrigger.pin)pins++;return {revert(){reverts++}}};
- const cleanup=mountMotion(f);assert.equal(pins,1);f.win.innerHeight=700;callbacks.get('resize')();assert.equal(pins,1);assert.equal(reverts,2);f.win.innerHeight=936;callbacks.get('resize')();assert.equal(pins,2);cleanup();assert.equal(callbacks.has('resize'),false);
+ const cleanup=mountMotion(f);assert.equal(pins,1);f.win.innerHeight=700;callbacks.get('resize')();assert.equal(pins,1);assert.equal(reverts,3);f.win.innerHeight=936;callbacks.get('resize')();assert.equal(pins,2);cleanup();assert.equal(callbacks.has('resize'),false);
+});
+
+test('animated counts progress numerically and restore their real value on cleanup',()=>{
+ const f=fixture(),number={textContent:'60',getAttribute:()=> '60'};const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='[data-count-to]'?[number]:original(q);
+ const calls=[];f.gsap.to=(state,vars)=>{calls.push({state,vars});return {revert(){}}};const cleanup=mountMotion(f);assert.equal(number.textContent,'0');assert.equal(calls[0].vars.value,60);assert.equal(calls[0].vars.scrollTrigger.once,true);
+ calls[0].state.value=31.8;calls[0].vars.onUpdate();assert.equal(number.textContent,'32');calls[0].state.value=60;calls[0].vars.onUpdate();assert.equal(number.textContent,'60');cleanup();assert.equal(number.textContent,'60');
+});
+test('evidence charts draw real paths and move the catalog marker only after viewport entry',()=>{
+ const f=fixture(),line={},marker={},chart={querySelector:q=>q==='.catalog-progress'?line:marker,querySelectorAll:()=>[]};const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.catalog-ruler'?[chart]:original(q);
+ const calls=[];f.gsap.fromTo=(target,from,to)=>{calls.push({target,from,to});return {revert(){}}};mountMotion(f);assert.ok(calls.some(x=>x.target===line&&x.from.strokeDashoffset===1&&x.to.strokeDashoffset===0&&x.to.scrollTrigger.once));assert.ok(calls.some(x=>x.target===marker&&x.from.attr.cx===30&&x.to.attr.cx===560));
+});
+
+test('rebuilding project pins preserves the current scroll destination',()=>{
+ const f=fixture();f.win.scrollY=12000;const cleanup=mountMotion(f);assert.equal(f.state.restoredY,12000);f.state.restoredY=undefined;f.listeners.get('portfolio:layout')();assert.equal(f.state.restoredY,12000);cleanup();
+});
+
+test('career history fades with actual viewport visibility and restores readable content on cleanup',()=>{
+ const f=fixture(),element={style:{opacity:'',removeProperty(){this.opacity=''}}},original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.freelance, .earlier-history'?[element]:original(q);
+ let callback,disconnected=false;f.win.IntersectionObserver=class{constructor(fn){callback=fn}observe(){}disconnect(){disconnected=true}};
+ const cleanup=mountMotion(f);callback([{target:element,intersectionRatio:0}]);assert.equal(element.style.opacity,'0');callback([{target:element,intersectionRatio:1}]);assert.equal(element.style.opacity,'1');callback([{target:element,intersectionRatio:.325}]);assert.equal(element.style.opacity,'0.5');callback([{target:element,intersectionRatio:.5,rootBounds:{height:600},boundingClientRect:{height:1200}}]);assert.equal(element.style.opacity,'1','tall history must be fully readable at maximum visible area');cleanup();assert.equal(disconnected,true);assert.equal(element.style.opacity,'');
 });

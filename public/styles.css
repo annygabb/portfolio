@@ -155,3 +155,28 @@ body:has(.centered-hero) .site-header{background:#091425;color:#f1eadf;border-co
 @media(prefers-reduced-motion:reduce){.project-scene{transform:none!important;clip-path:none!important}}
 
 @media(min-width:768px) and (min-height:700px) and (prefers-reduced-motion:no-preference){.project-stage .project-screen{height:auto}.project-stage .project-scene{height:auto;min-height:calc(100svh - var(--header-height))}}
+/* Scroll choreography: real perspective and overlapping project screens. */
+:root{--hero-blue:#b9c9e2}
+.locale-switch .locale-link{opacity:1;min-width:32px;font-weight:800;border:0}
+.scroll-thread{position:fixed;left:15px;top:calc(var(--header-height) + 24px);bottom:24px;width:18px;z-index:102;pointer-events:none;color:var(--hero-blue)}
+.scroll-thread svg{width:100%;height:100%;overflow:visible}.scroll-thread path{fill:none;stroke:currentColor;vector-effect:non-scaling-stroke}.thread-track{stroke-width:1;opacity:.17}.thread-progress{stroke-width:2;stroke-dasharray:1;stroke-dashoffset:1;stroke-linecap:round}.thread-tip{fill:currentColor;filter:drop-shadow(0 0 4px #b9c9e299)}
+.quality-lines .quality-value{font-size:11px;font-weight:700;fill:currentColor;stroke:none}.quality-lines .quality-node{transform-box:fill-box;transform-origin:center}.quality-lines .quality-value.line-0{color:#2455d6}.quality-lines .quality-value.line-1{color:#36877b}.quality-lines .quality-value.line-2{color:#8b69b1}
+.catalog-total{margin:0 0 22px!important;font-size:12px;color:var(--ink)}.catalog-total>strong{font-size:58px;line-height:1;font-weight:600;letter-spacing:-.05em;margin-right:10px;font-variant-numeric:tabular-nums}.catalog-ruler .catalog-progress,.catalog-ruler .catalog-marker{color:var(--blue)}
+@media(min-width:768px) and (min-height:700px) and (prefers-reduced-motion:no-preference){
+ .work .project-grid{background:#091425}
+ .project-grid .project-card.project-stage{--scene-bg:var(--pale);background:#091425!important;z-index:var(--stage-order)}
+ .project-grid .project-card.project-stage:nth-child(even){--scene-bg:var(--bg)}
+ .project-stage .project-screen{perspective:1600px;perspective-origin:50% 45%;overflow:visible;background:transparent;isolation:isolate}
+ .project-stage .project-scene{background:var(--scene-bg);transform-style:preserve-3d;transform-origin:50% 50%;backface-visibility:hidden;clip-path:none!important}
+ .project-stage .stage-copy{transform:translateZ(24px)}.project-stage .stage-visual{transform-style:preserve-3d}.project-stage .stage-footnote{transform:translateZ(10px)}
+ .project-stage .project-tool-detail{position:relative;background:var(--scene-bg);margin:0;width:100%;padding:45px max(48px,calc((100% - 1184px)/2)) 70px}
+}
+@media(max-width:600px){.scroll-thread{left:4px;width:10px;top:calc(var(--header-height) + 16px);bottom:16px}.catalog-total>strong{font-size:48px}}
+@media(prefers-reduced-motion:reduce){.scroll-thread{display:none}.freelance,.earlier-history{opacity:1!important;transform:none!important}.quality-line{stroke-dashoffset:0!important}.quality-node,.quality-value{opacity:1!important}}
+
+.quality-lines .quality-value{fill:var(--ink);color:var(--ink)!important}
+/* Lenis owns smooth interpolation; native anchor jumps must stay immediate. */
+html.smooth-motion{scroll-behavior:auto!important}
+
+.freelance,.earlier-history{transition:opacity .25s ease}
+@media(prefers-reduced-motion:reduce){.freelance,.earlier-history{transition:none}}

@@ -43,7 +43,7 @@ test('home introduces Anny before work, skills and résumé in both languages',(
   assert.ok(ids.every(i=>i>=0),'all requested sections exist');
   assert.ok(ids.every((v,i)=>!i||v>ids[i-1]),'requested reading order');
   assert.match(html,/<h1[^>]*>[\s\S]*?Anny[\s\S]*?<\/h1>/);
-  assert.match(html,/<img[^>]*src="\/assets\/anny-transparent-v2.webp"[^>]*width="900"[^>]*height="900"/);
+  assert.match(html,/<img[^>]*src="\/assets\/anny-portrait-hd.webp"[^>]*width="1254"[^>]*height="1254"/);
   assert.ok(html.includes(`href="/assets/${prefix?'Anny-Gabrielly-Resume-EN.pdf':'Anny-Gabrielly-Curriculo.pdf'}" download=`));
   assert.ok(html.includes(prefix?'>PORTFOLIO</div>':'>PORTFÓLIO</div>'));
   for(const id of ['sobre','formacao','projetos','impacto','skills','curriculo','contato'])assert.ok(html.includes(`data-nav="${id}"`));
@@ -83,13 +83,14 @@ test('tool evidence belongs to each project, with no duplicate method or quality
   assert.match(html,/<a[^>]*data-nav="curriculo"[^>]*>CV<\/a>/);
  }
 });
-test('language selector identifies the current language and links explicitly to both equivalent routes',()=>{
- for(const prefix of ['','en/']){
-  const html=readFileSync(`dist/${prefix}index.html`,'utf8');
+test('language switch shows only the other language on every equivalent route',()=>{
+ for(const prefix of ['','en/'])for(const slug of ['', 'cases/help/', 'cases/pagespeed-seo-optimizer/']){
+  const html=readFileSync(`dist/${prefix}${slug}index.html`,'utf8');
   const switcher=html.match(/<nav class="locale-switch"[\s\S]*?<\/nav>/)[0];
-  assert.match(switcher,/<a[^>]*href="\/"[^>]*lang="pt-BR"[^>]*>PT<\/a>/);
-  assert.match(switcher,/<a[^>]*href="\/en\/"[^>]*lang="en"[^>]*>EN<\/a>/);
-  assert.match(switcher,prefix?/<a[^>]*lang="en"[^>]*aria-current="page"[^>]*>EN/:/<a[^>]*lang="pt-BR"[^>]*aria-current="page"[^>]*>PT/);
+  assert.equal((switcher.match(/<a /g)||[]).length,1);
+  assert.ok(switcher.includes(`href="/${prefix?'':'en/'}${slug}"`));
+  assert.match(switcher,prefix?/>PT<\/a>/:/>EN<\/a>/);
+  assert.ok(!switcher.includes('aria-current'));
  }
 });
 
