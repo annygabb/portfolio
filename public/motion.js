@@ -50,22 +50,39 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
       const previousY=win.scrollY;
       projectTweens.slice().reverse().forEach(tween=>tween.revert());projectTweens=[];
       const stages=[...doc.querySelectorAll('.project-stage:not([hidden])')];
-      if(context.conditions.staged)for(const [index,stage] of stages.entries()){
-        const screen=stage.querySelector('.project-screen'), visual=stage.querySelector('.stage-visual'), scene=stage.querySelector('.project-scene');
+      if(context.conditions.staged){
+        // Full, opaque foreground panels cover the previous panel. No retreat,
+        // artificial spacer, shrinking page or empty perspective background.
+        const units=[];
+        for(const stage of stages){
+          const screen=stage.querySelector('.project-screen'),scene=stage.querySelector('.project-scene');
+          if(screen&&scene)units.push({element:screen,scene,kind:'project'});
+          const panel=stage.querySelector('.tool-transition'),detail=stage.querySelector('.project-tool-detail');
+          if(panel)units.push({element:panel,detail,kind:'detail'});
+        }
+        const carousel=doc.querySelector('.website-carousel:not([hidden])');
+        if(carousel)units.push({element:carousel,kind:'carousel'});
         const header=()=>doc.querySelector('.site-header')?.offsetHeight||0;
         const available=win.innerHeight-header();
-        if(!screen || !scene || scene.scrollHeight>available+2)continue;
-        // The screen stays fixed; its child travels through actual perspective space.
-        projectTweens.push(gsap.fromTo(scene,{x:0,y:0,rotationX:18,rotationY:-6,z:-650,yPercent:14,scale:0.88,opacity:0.45},{x:0,y:0,rotationX:0,rotationY:0,z:0,yPercent:0,scale:1,opacity:1,ease:'none',scrollTrigger:{trigger:screen,start:'top bottom',end:()=>`top top+=${header()}`,scrub:0.65,invalidateOnRefresh:true}}));
-        projectTweens.push(gsap.fromTo(scene,{x:0,y:0,rotationX:0,rotationY:0,z:0,yPercent:0,scale:1,opacity:1},{x:0,y:0,rotationX:-18,rotationY:6,z:-650,yPercent:-8,scale:0.88,opacity:0.3,immediateRender:false,ease:p=>Math.max(0,(p-0.55)/0.45),scrollTrigger:{trigger:screen,start:()=>`top top+=${header()}`,end:()=>`+=${Math.round(available*1.4)}`,pin:screen,pinSpacing:stage.querySelector('.project-tool-detail')?!stage.querySelector('.project-tool-detail').open:index===stages.length-1,scrub:0.65,invalidateOnRefresh:true}}));
-        if(visual)projectTweens.push(gsap.fromTo(visual,{z:0,yPercent:2},{z:70,yPercent:-3,ease:'none',scrollTrigger:{trigger:screen,start:()=>`top top+=${header()}`,end:()=>`+=${Math.round(available*.75)}`,scrub:0.65,invalidateOnRefresh:true}}));
-      }
-      if(context.conditions.staged)for(const stage of stages){
-        const panel=stage.querySelector('.tool-transition'),depth=stage.querySelector('.tool-detail-depth');
-        const detail=stage.querySelector('.project-tool-detail'),available=win.innerHeight-(doc.querySelector('.site-header')?.offsetHeight||0);
-        if(!panel||!depth||!detail?.open||panel.offsetHeight<=available)continue;
-        projectTweens.push(gsap.fromTo(depth,{x:0,y:80,rotationX:18,rotationY:-6,z:-650,scale:.88,opacity:.45},{x:0,y:0,rotationX:0,rotationY:0,z:0,scale:1,opacity:1,ease:'none',scrollTrigger:{trigger:panel,start:'top bottom',end:()=>`top top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,scrub:.65,invalidateOnRefresh:true}}));
-        projectTweens.push(gsap.fromTo(depth,{x:0,y:0,rotationX:0,rotationY:0,z:0,scale:1,opacity:1},{x:0,y:-80,rotationX:-18,rotationY:6,z:-650,scale:.88,opacity:.35,immediateRender:false,ease:'none',scrollTrigger:{trigger:panel,start:'bottom bottom',end:()=>`bottom top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,scrub:.65,invalidateOnRefresh:true}}));
+        for(let index=0;index<units.length-1;index++){
+          const unit=units[index],next=units[index+1];
+          if(unit.kind==='project'&&unit.scene.scrollHeight>available+2)continue;
+          if(unit.kind==='detail'&&(!unit.detail?.open||unit.element.offsetHeight<=available))continue;
+          // Tall evidence panels scroll completely before their bottom is held.
+          // Incoming surfaces move in normal document flow in front of that hold.
+          projectTweens.push(gsap.to({}, {duration:1,ease:'none',scrollTrigger:{
+            trigger:unit.element,
+            start:unit.kind==='detail'?'bottom bottom':()=>`top top+=${header()}`,
+            endTrigger:next.element,end:()=>`top top+=${header()}`,
+            pin:unit.element,pinSpacing:false,invalidateOnRefresh:true
+          }}));
+        }
+        // Only the screenshot settles into place; the page remains full-size.
+        for(const stage of stages){
+          const screen=stage.querySelector('.project-screen'),scene=stage.querySelector('.project-scene'),visual=stage.querySelector('.stage-visual');
+          if(!screen||!scene||!visual||scene.scrollHeight>available+2)continue;
+          projectTweens.push(gsap.fromTo(visual,{y:30,scale:1.035},{y:0,scale:1,ease:'none',scrollTrigger:{trigger:screen,start:'top bottom',end:()=>`top top+=${header()}`,scrub:.35,invalidateOnRefresh:true}}));
+        }
       }
       for(const frame of doc.querySelectorAll('.case-cover > img')){
         projectTweens.push(gsap.fromTo(frame,{y:desktop?22:10,scale:0.98},{y:0,scale:1,ease:'none',scrollTrigger:{trigger:frame.parentElement,start:'clamp(top 96%)',end:'clamp(center 67%)',scrub:0.7,invalidateOnRefresh:true}}));
