@@ -39,12 +39,14 @@ test('PageSpeed cover reserves its actual image aspect ratio',()=>{
 test('home introduces Anny before work, skills and résumé in both languages',()=>{
  for(const prefix of ['','en/']){
   const html=readFileSync(`dist/${prefix}index.html`,'utf8');
-  const ids=['sobre','projetos','skills','curriculo'].map(id=>html.indexOf(`id="${id}"`));
+  const ids=['sobre','perfil','formacao','projetos','impacto','skills','curriculo'].map(id=>html.indexOf(`id="${id}"`));
   assert.ok(ids.every(i=>i>=0),'all requested sections exist');
   assert.ok(ids.every((v,i)=>!i||v>ids[i-1]),'requested reading order');
   assert.match(html,/<h1[^>]*>[\s\S]*?Anny[\s\S]*?<\/h1>/);
   assert.match(html,/<img[^>]*src="\/assets\/anny-transparent-v2.webp"[^>]*width="900"[^>]*height="900"/);
-  assert.match(html,/<a[^>]*href="\/assets\/Anny-Gabrielly-Curriculo.pdf"[^>]*download/);
+  assert.ok(html.includes(`href="/assets/${prefix?'Anny-Gabrielly-Resume-EN.pdf':'Anny-Gabrielly-Curriculo.pdf'}" download=`));
+  assert.ok(html.includes(prefix?'>PORTFOLIO</div>':'>PORTFÓLIO</div>'));
+  for(const id of ['sobre','formacao','projetos','impacto','skills','curriculo','contato'])assert.ok(html.includes(`data-nav="${id}"`));
  }
 });
 test('product cases explain frontend and backend contributions separately',()=>{

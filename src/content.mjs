@@ -1,7 +1,7 @@
 export const owner = {
  name:'Anny Gabrielly', email:'annygabbyoficial@gmail.com',
  github:'https://github.com/annygabb', linkedin:'https://www.linkedin.com/in/annygabrielly/',
- site:'https://portfolioanny.vercel.app', resume:'/assets/Anny-Gabrielly-Curriculo.pdf'
+ site:'https://portfolioanny.vercel.app', resume:'/assets/Anny-Gabrielly-Curriculo.pdf', resumeEn:'/assets/Anny-Gabrielly-Resume-EN.pdf'
 };
 export const choose=(value,lang)=>Array.isArray(value)?value[lang==='en'?1:0]:value;
 const gh=(repo,path='README.md')=>`https://github.com/annygabb/${repo}/blob/main/${path}`;
