@@ -8,26 +8,21 @@ export function renderHome(lang,{card,tags,arrow,down,ext,path}){
   {title:'Back-end',subtitle:t('Estrutura para o produto funcionar.','Structure that makes the product work.'),body:t('APIs, regras de negócio, autenticação e persistência. Cuido da identidade de quem solicita, da consistência dos dados e das integrações entre sistemas.','APIs, business rules, authentication and persistence. I work on requester identity, data consistency and integrations across systems.'),items:['Java 21','Spring Boot','PostgreSQL','REST · JWT','Maven · Postman'],link:'help',cta:t('Explore o backend do Help','Explore the Help backend')},
  ];
  return `<main id="main">
-<div class="hero-canvas"><div class="hero-watermark" aria-hidden="true">FULL STACK</div><section class="identity-hero container" id="sobre" aria-labelledby="hero-title">
- <div class="hero-copy">
-  <p class="intro-label"><span class="availability-dot"></span>${t('Analista de Sistemas & Desenvolvedora Full-Stack','Systems Analyst & Full-Stack Developer')}</p>
-  <h1 id="hero-title">Anny<br>Gabrielly<span class="name-period">.</span></h1>
-  <p class="identity-signature">${t('Do código ao','From code to')} <em>${t('impacto.','impact.')}</em></p>
-  <p class="hero-intro">${t('Crio sites para apresentar negócios, sistemas para organizar dados e automações para reduzir tarefas manuais. Da interface às regras que fazem tudo funcionar.','I build interfaces, develop APIs and automate processes. My work connects what people see to what makes a system work.')}</p>
-  <p class="identity-bio">${t('Analista de Sistemas na NTT DATA e desenvolvedora freelancer. Cursando o 8º semestre de Engenharia de Software na UniEVANGÉLICA.','Systems Analyst at NTT DATA and freelance developer. In my final year of Software Engineering at UniEVANGÉLICA.')}</p>
-  <div class="hero-actions"><a class="button primary" href="#projetos">${c.view}${down}</a><a class="text-link" href="${owner.resume}" download="Anny-Gabrielly-Curriculo.pdf">${t('Baixar currículo','Download résumé')}${arrow}</a></div>
-  <div class="identity-socials">${ext(owner.github,'GitHub')}${ext(owner.linkedin,'LinkedIn')}<span>${t('Silvânia, GO · Brasil','Silvânia, GO · Brazil')}</span></div>
- </div>
- <div class="portrait-stage">
-  <div class="portrait-outline" aria-hidden="true"></div>
-  <div class="portrait-depth">
-   <figure class="portrait-frame"><img src="/assets/anny.webp" alt="Anny Gabrielly" width="400" height="400" fetchpriority="high" decoding="async"><figcaption>${t('Prazer, Anny.','Hi, I’m Anny.')}</figcaption></figure>
-   <div class="layer-note front-note"><span>Front-end</span><strong>React & TypeScript</strong></div>
-   <div class="layer-note back-note"><span>Back-end</span><strong>Java · Spring · PostgreSQL</strong></div>
+<div class="hero-canvas centered-hero"><section class="identity-hero container" id="sobre" aria-labelledby="hero-title">
+ <div class="hero-masthead"><p>${t('Desenvolvedora full-stack','Full-stack developer')}<br><span>${t('Sites · sistemas · automação','Websites · systems · automation')}</span></p><span class="masthead-signature" aria-hidden="true">ag.</span><p>${t('Silvânia, GO · Brasil','Silvânia, GO · Brazil')}<br><span>${t('Projetos & oportunidades','Projects & opportunities')}</span></p></div>
+ <div class="hero-artboard">
+  <div class="hero-watermark" aria-hidden="true">${t('PORTFÓLIO','PORTFOLIO')}</div>
+  <div class="portrait-stage"><div class="portrait-depth"><figure class="portrait-frame"><img src="/assets/anny-cutout.webp" alt="Anny Gabrielly" width="900" height="900" fetchpriority="high" decoding="async"></figure></div></div>
+  <div class="hero-copy">
+   <p class="hero-greeting">${t('Olá, eu sou','Hello, I’m')}</p>
+   <h1 id="hero-title">Anny<br>Gabrielly<span class="name-period">.</span></h1>
+   <p class="hero-role">${t('Desenvolvedora<br>Full-stack','Full-stack<br>Developer')}</p>
+   <p class="hero-intro">${t('Sites que apresentam.<br>Sistemas que organizam.<br>Automações que simplificam.','Websites that introduce.<br>Systems that organize.<br>Automation that simplifies.')}</p>
+   <div class="hero-actions"><a class="text-link" href="#projetos">${c.view}${arrow}</a></div>
   </div>
-  <p class="portrait-caption">${t('Interfaces com intenção.<br>Sistemas com estrutura.','Intentional interfaces.<br>Structured systems.')}</p>
+  <div class="hero-aside"><span class="hero-star" aria-hidden="true">✧</span><p>${t('Da experiência na tela<br>às regras e aos dados.<br>Eu conecto as duas pontas.','From the experience on screen<br>to rules and data.<br>I connect both sides.')}</p><p class="identity-signature">${t('Do código ao','From code to')}<br><em>${t('impacto.','impact.')}</em></p><a class="text-link" href="${owner.resume}" download="Anny-Gabrielly-Curriculo.pdf">${t('Baixar currículo','Download résumé')}${down}</a></div>
  </div>
- <div class="identity-foot"><p>${t('Uma visão completa do produto.','A complete view of the product.')}</p><ul><li>${t('Experiência de uso','User experience')}</li><li>${t('Regras e dados','Rules and data')}</li><li>${t('Automação de processos','Process automation')}</li></ul><a href="#projetos" aria-label="${c.view}">${down}</a></div>
+ <div class="hero-profile-strip"><div class="profile-intro"><p class="strip-label">${t('Quem está por trás','The person behind the work')}</p><strong>Anny Gabrielly</strong><p>${t('Analista de Sistemas na NTT DATA.<br>Desenvolvedora freelancer.','Systems Analyst at NTT DATA.<br>Freelance developer.')}</p></div><div class="profile-context"><p>${t('Construo interfaces, APIs e automações para transformar necessidades reais em produtos que fazem sentido para as pessoas.','I build interfaces, APIs and automation to turn real needs into products people can understand.')}</p><div class="identity-socials">${ext(owner.github,'GitHub')}${ext(owner.linkedin,'LinkedIn')}</div></div><div class="hero-facts"><a href="${path(lang,'pagespeed-seo-optimizer')}"><strong>20<span>★</span></strong><span>${t('na minha skill · GitHub','on my skill · GitHub')}<small>30/10/2026</small></span>${arrow}</a><a href="#projetos"><strong>3</strong><span>${t('sites de clientes<br>em produção','client websites<br>in production')}</span>${arrow}</a><a href="#projetos"><strong>2</strong><span>${t('produtos autorais<br>em evolução','independent products<br>in development')}</span>${arrow}</a></div></div>
 </section></div>
 <section class="work section container" id="projetos">
  <div class="section-heading"><div><p class="section-label">${t('Projetos selecionados','Selected work')}</p><h2>${c.workTitle}</h2></div><p>${c.workIntro}</p></div>
