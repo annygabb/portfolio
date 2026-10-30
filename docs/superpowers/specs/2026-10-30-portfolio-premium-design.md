@@ -28,7 +28,7 @@ Aproveitar a narrativa visual e as imagens amplas de Tiago Horta, o respiro e a 
 4. Impacto documentado: cerca de 60 chamados/mês como volume de suporte; transformação do fluxo de verificação de dados; 20 estrelas da skill com data de consulta e link.
 5. Método: entendimento do problema, construção, validação e acompanhamento; explicar o uso das ferramentas próprias.
 6. Sobre e experiência: NTT DATA, trabalho freelancer, Engenharia de Software e certificação SFC; experiências anteriores resumidas, preservando datas absolutas do PDF e evitando duração relativa desatualizada.
-7. Contato: e-mail, LinkedIn e GitHub; currículo baseado no Profile atualizado. Reaproveitar idioma/tema existentes se agregarem e mantiverem consistência, a decidir na implementação.
+7. Contato: e-mail, LinkedIn e GitHub; currículo baseado no Profile atualizado. Preservar PT/EN e alternância de tema claro/escuro existentes, com branco/azul como apresentação padrão. Usar Profile(1).pdf como currículo original baixável.
 
 ## Cases individuais
 Rotas propostas /cases/help/, /cases/uaiconta/, /cases/pagespeed-seo-optimizer/, /cases/orquestrador-de-sites/, /cases/tiago-horta/, /cases/ludmila-grossi/ e /cases/er-juridico/.
@@ -64,3 +64,11 @@ O seletor do Orquestrador foi aberto, mas nenhuma confirmação de seleção foi
 
 ## Critérios de aceite
 Home e sete cases completos; apresentação profissional atualizada; tipografia caligráfica pontual; capturas reais otimizadas; evidências rastreáveis e contextualizadas; contato/currículo funcionais; responsividade e movimento reduzido; verificações documentadas. Nenhum depoimento, percentual de economia, faturamento ou taxa de conversão inventado.
+
+## Revisão de implementação
+Builder check concluído: desenho implementável, sem escolha material pendente. Incorporados os seguintes critérios:
+- Registrar mapa de evidências com fonte, commit, data e dispositivo quando disponíveis, além da afirmação sustentada.
+- Buscar baselines em arquivos e histórico dos repositórios antes de publicar comparações. Não tratar a simples existência de um fluxo antes/depois na skill como evidência de um comparativo real de cliente.
+- Se retrato ou captura não estiver disponível, usar composição editorial com assets reais e texto; não bloquear o projeto nem fabricar telas.
+- Fontes adicionais verificadas via GitHub Actions: Help Validar HELP com sucesso na main no commit d984ba0b04823ed6f2b2ddb74d200148b48273f8 (run 40787778202); UaiConta V4 CI com sucesso na main no commit 16f6be99c9d2252bef15f1195773dda9774bcebe (run 38304583725). Conferir escopo dos jobs antes de detalhar testes aprovados.
+- Runs recentes do Orquestrador consultados são da branch feat/skill-discovery-orchestration; não atribuir automaticamente seus resultados à main.
