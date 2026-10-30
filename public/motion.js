@@ -38,6 +38,13 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
       if(frame)gsap.from(frame,{y:30,opacity:0,duration:1,ease:'power2.out',clearProps:'all'});
       if(desktop)gsap.to(portrait,{y:-34,rotationY:-7,rotationX:4,z:28,ease:'none',scrollTrigger:{trigger:'.identity-hero',start:'top top',end:'bottom top',scrub:0.8}});
     }
+    if(desktop){
+      const watermark=doc.querySelector('.hero-watermark');
+      if(watermark)gsap.to(watermark,{xPercent:-8,y:75,ease:'none',scrollTrigger:{trigger:'.hero-canvas',start:'top top',end:'bottom top',scrub:1}});
+    }
+    for(const bar of doc.querySelectorAll('.score-fill')){
+      gsap.from(bar,{scaleX:0,duration:1.1,ease:'power2.out',scrollTrigger:{trigger:bar,start:'top 94%',once:true},clearProps:'transform'});
+    }
     for(const element of doc.querySelectorAll('.section-heading, .capability-column, .automation-capability, .resume-section')){
       gsap.from(element,{y:desktop?26:14,opacity:0.35,duration:0.75,ease:'power2.out',clearProps:'all',scrollTrigger:{trigger:element,start:'top 94%',once:true}});
     }

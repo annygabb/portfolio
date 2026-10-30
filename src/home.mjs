@@ -1,3 +1,4 @@
+import {impactPanel, engagementSection} from './impact.mjs';
 import {owner,projects,copy,choose} from './content.mjs';
 
 export function renderHome(lang,{card,tags,arrow,down,ext,path}){
@@ -7,12 +8,12 @@ export function renderHome(lang,{card,tags,arrow,down,ext,path}){
   {title:'Back-end',subtitle:t('Estrutura para o produto funcionar.','Structure that makes the product work.'),body:t('APIs, regras de negócio, autenticação e persistência. Cuido da identidade de quem solicita, da consistência dos dados e das integrações entre sistemas.','APIs, business rules, authentication and persistence. I work on requester identity, data consistency and integrations across systems.'),items:['Java 21','Spring Boot','PostgreSQL','REST · JWT','Maven · Postman'],link:'help',cta:t('Explore o backend do Help','Explore the Help backend')},
  ];
  return `<main id="main">
-<section class="identity-hero container" id="sobre" aria-labelledby="hero-title">
+<div class="hero-canvas"><div class="hero-watermark" aria-hidden="true">FULL STACK</div><section class="identity-hero container" id="sobre" aria-labelledby="hero-title">
  <div class="hero-copy">
   <p class="intro-label"><span class="availability-dot"></span>${t('Analista de Sistemas & Desenvolvedora Full-Stack','Systems Analyst & Full-Stack Developer')}</p>
   <h1 id="hero-title">Anny<br>Gabrielly<span class="name-period">.</span></h1>
   <p class="identity-signature">${t('Do código ao','From code to')} <em>${t('impacto.','impact.')}</em></p>
-  <p class="hero-intro">${t('Construo interfaces, desenvolvo APIs e automatizo processos. Meu trabalho conecta o que as pessoas veem ao que faz o sistema funcionar.','I build interfaces, develop APIs and automate processes. My work connects what people see to what makes a system work.')}</p>
+  <p class="hero-intro">${t('Crio sites para apresentar negócios, sistemas para organizar dados e automações para reduzir tarefas manuais. Da interface às regras que fazem tudo funcionar.','I build interfaces, develop APIs and automate processes. My work connects what people see to what makes a system work.')}</p>
   <p class="identity-bio">${t('Analista de Sistemas na NTT DATA e desenvolvedora freelancer. Cursando o 8º semestre de Engenharia de Software na UniEVANGÉLICA.','Systems Analyst at NTT DATA and freelance developer. In my final year of Software Engineering at UniEVANGÉLICA.')}</p>
   <div class="hero-actions"><a class="button primary" href="#projetos">${c.view}${down}</a><a class="text-link" href="${owner.resume}" download="Anny-Gabrielly-Curriculo.pdf">${t('Baixar currículo','Download résumé')}${arrow}</a></div>
   <div class="identity-socials">${ext(owner.github,'GitHub')}${ext(owner.linkedin,'LinkedIn')}<span>${t('Silvânia, GO · Brasil','Silvânia, GO · Brazil')}</span></div>
@@ -27,12 +28,13 @@ export function renderHome(lang,{card,tags,arrow,down,ext,path}){
   <p class="portrait-caption">${t('Interfaces com intenção.<br>Sistemas com estrutura.','Intentional interfaces.<br>Structured systems.')}</p>
  </div>
  <div class="identity-foot"><p>${t('Uma visão completa do produto.','A complete view of the product.')}</p><ul><li>${t('Experiência de uso','User experience')}</li><li>${t('Regras e dados','Rules and data')}</li><li>${t('Automação de processos','Process automation')}</li></ul><a href="#projetos" aria-label="${c.view}">${down}</a></div>
-</section>
+</section></div>
 <section class="work section container" id="projetos">
  <div class="section-heading"><div><p class="section-label">${t('Projetos selecionados','Selected work')}</p><h2>${c.workTitle}</h2></div><p>${c.workIntro}</p></div>
  <div class="filters js-control" hidden role="group" aria-label="${c.filterLabel}">${c.filters.map((f,i)=>`<button type="button" data-filter="${['all','product','tool','website'][i]}" aria-pressed="${i===0}">${f}${i===0?'<span>07</span>':''}</button>`).join('')}</div>
  <div class="project-grid">${projects.map((p,i)=>card(p,lang,i)).join('')}</div><p class="filter-status sr-only" role="status" aria-live="polite"></p>
 </section>
+${impactPanel(lang)}
 <section class="skills-section section" id="skills"><div class="container">
  <div class="section-heading"><div><p class="section-label">${t('Skills & capacidades','Skills & capabilities')}</p><h2>${t('Da interface à<br>regra de <em>negócio.</em>','From the interface<br>to business <em>logic.</em>')}</h2></div><p>${t('O front dá forma à experiência. O back sustenta os dados, as regras e a confiança. Trabalho nas duas camadas para conectar a jornada inteira.','The front shapes the experience. The back supports data, rules and trust. I work across both layers to connect the whole journey.')}</p></div>
  <div class="capability-grid">${capabilities.map(x=>`<article class="capability-column"><p class="capability-label">${x.title}</p><h3>${x.subtitle}</h3><p>${x.body}</p>${tags(x.items)}<a class="text-link" href="${path(lang,x.link)}">${x.cta}${arrow}</a></article>`).join('')}</div>
@@ -41,6 +43,7 @@ export function renderHome(lang,{card,tags,arrow,down,ext,path}){
 </div></section>
 <section class="method section" id="metodo"><div class="container method-grid"><div><p class="section-label">${t('Ferramentas que eu criei','Tools I created')}</p><h2>${c.toolsTitle}</h2><p class="lead">${c.toolsIntro}</p><p>${c.toolsText}</p><a class="text-link" href="${path(lang,'orquestrador-de-sites')}">${c.toolAction}${arrow}</a></div><div class="method-proof"><a class="stars-proof" href="${path(lang,'pagespeed-seo-optimizer')}"><span class="star-symbol" aria-hidden="true">✳</span><strong>20<span>★</span></strong><span>${c.starText}</span><small>${c.starCaption}</small>${arrow}</a><div class="method-links"><a href="${path(lang,'pagespeed-seo-optimizer')}"><span>PageSpeed & SEO</span><small>${t('Auditar → otimizar → validar','Audit → optimize → validate')}</small>${arrow}</a><a href="${path(lang,'orquestrador-de-sites')}"><span>Orquestrador de Sites</span><small>${t('Selecionar → contextualizar → construir','Select → contextualize → build')}</small>${arrow}</a></div></div></div></section>
 <section class="experience section" id="experiencia"><div class="container"><div class="section-heading"><div><p class="section-label">${t('Experiência profissional','Professional experience')}</p><h2>${c.experienceTitle}</h2></div><a class="text-link" href="#curriculo">${c.cv}${arrow}</a></div><article class="experience-row"><div class="experience-company"><h3>NTT DATA</h3><p>Europe & Latam</p><small>${c.expDate}</small></div><div><h3>${c.expRole}</h3><p>${c.expText}</p></div><div class="calls-proof"><strong>~60</strong><p>${c.calls}</p><small>${c.callsNote}</small></div></article><div class="automation"><h3>${c.automationTitle}</h3><div class="process-comparison"><div><span>${c.before}</span><p>${c.beforeText}</p></div><div><span>${c.after}</span><p>${c.afterText}</p></div></div><p class="evidence-note">${c.automationNote}</p></div><article class="experience-row freelance"><div class="experience-company"><h3>Freelance</h3><small>${c.freelanceDate}</small></div><div><h3>${c.freelanceRole}</h3><p>${c.freelanceText}</p></div></article><details class="earlier"><summary>${c.earlier}<span aria-hidden="true">+</span></summary><p>${t('Instituto Auxiliadora · administrativo, digitalização e suporte técnico (jan. 2025–jan. 2026). Papelutti · produção gráfica (mai.–dez. 2024). TRE-GO · estágio administrativo (mai.–dez. 2022). Experiências que conectam comunicação, organização e execução.','Instituto Auxiliadora · administration, digitization and technical support (Jan. 2025–Jan. 2026). Papelutti · graphic production (May–Dec. 2024). TRE-GO · administrative internship (May–Dec. 2022). Experience connecting communication, organization and execution.')}</p></details></div></section>
+${engagementSection(lang)}
 <section class="resume-section section container" id="curriculo"><div><p class="section-label">${t('Meu percurso em detalhe','My background in detail')}</p><h2>${t('Leve meu <em>currículo.</em>','Take my <em>résumé.</em>')}</h2><p>${t('Experiência, formação e competências reunidas no documento profissional atualizado.','Experience, education and skills brought together in my current professional document.')}</p></div><a class="button primary" href="${owner.resume}" download="Anny-Gabrielly-Curriculo.pdf">${t('Baixar currículo em PDF','Download résumé PDF')}${down}</a></section>
 </main>`;
 }

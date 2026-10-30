@@ -54,3 +54,12 @@ test('product cases explain frontend and backend contributions separately',()=>{
   assert.match(html,/Front-end/);assert.match(html,/Back-end/);
  }
 });
+test('evidence chart preserves all four scores and their limitations',()=>{
+ for(const prefix of ['','en/']){
+  const html=readFileSync(`dist/${prefix}index.html`,'utf8');
+  const values=[...html.matchAll(/class="score-fill tone-\d"><\/i><\/div><b>(\d+)<\/b>/g)].map(m=>Number(m[1]));
+  assert.deepEqual(values,[98,100,100,100,100,100,100,100,100,94,100,100]);
+  assert.match(html,/baseline/);assert.match(html,/id="contratar"/);
+  assert.match(html,prefix?/Custom quote/:/Sob orçamento/);
+ }
+});
