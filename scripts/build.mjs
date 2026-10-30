@@ -1,8 +1,20 @@
-import {mkdir,writeFile,cp,rm} from 'node:fs/promises';
+import {mkdir,writeFile,cp,rm,readFile} from 'node:fs/promises';
 import {renderPage} from '../src/render.mjs';
 import {projects,owner} from '../src/content.mjs';
 await rm('dist',{recursive:true,force:true}); await mkdir('dist',{recursive:true});
 await cp('public','dist',{recursive:true});
+await mkdir('dist/vendor',{recursive:true});
+for(const [source,target] of [
+ ['node_modules/gsap/dist/gsap.min.js','gsap.min.js'],
+ ['node_modules/gsap/dist/ScrollTrigger.min.js','ScrollTrigger.min.js'],
+ ['node_modules/lenis/dist/lenis.min.js','lenis.min.js'],
+ ['node_modules/lenis/dist/lenis.css','lenis.css'],
+ ['node_modules/lenis/LICENSE','Lenis-LICENSE.txt']
+]){
+ const content=await readFile(source,'utf8');
+ await writeFile('dist/vendor/'+target,content.replace(/\/\/# sourceMappingURL=.*$/gm,''));
+}
+await writeFile('dist/vendor/THIRD-PARTY.txt','GSAP 3.15.0 and ScrollTrigger: Copyright GreenSock. Standard license https://gsap.com/standard-license. Original copyright headers preserved.\nLenis 1.3.27: MIT, darkroom.engineering. See Lenis-LICENSE.txt.\n');
 const routes=[];
 for(const lang of ['pt','en']) for(const project of [null,...projects]){
  const route=(lang==='en'?'/en/':'/')+(project?`cases/${project.slug}/`:'');

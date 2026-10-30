@@ -30,6 +30,7 @@ for(const button of document.querySelectorAll('[data-filter]')) button.addEventL
   for(const card of cards) card.hidden = value !== 'all' && card.dataset.kind !== value;
   const status = document.querySelector('.filter-status');
   if(status) status.textContent = labels.count(cards.filter(el => !el.hidden).length);
+  document.dispatchEvent(new CustomEvent('portfolio:layout'));
 });
 document.querySelector('.copy-email')?.addEventListener('click', async () => {
   const status = document.querySelector('.copy-status');
@@ -43,16 +44,13 @@ for(const a of document.querySelectorAll('[data-lightbox]')) a.addEventListener(
   e.preventDefault(); previousFocus = a;
   const img = dialog.querySelector('img'); img.src = a.href; img.alt = a.querySelector('img').alt;
   dialog.showModal();
+  document.documentElement.classList.add('dialog-open');
+  document.dispatchEvent(new CustomEvent('portfolio:dialog',{detail:{open:true}}));
 });
 dialog?.querySelector('button')?.addEventListener('click', () => dialog.close());
 dialog?.addEventListener('click', e => { if(e.target === dialog) dialog.close(); });
-dialog?.addEventListener('close', () => previousFocus?.focus());
-// Progressive motion: readable HTML stays visible if JS or observation fails.
-if(!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window){
-  const observer = new IntersectionObserver(entries => {
-    for(const entry of entries) if(entry.isIntersecting){ entry.target.classList.add('is-visible'); observer.unobserve(entry.target); }
-  }, {threshold:0.06});
-  document.querySelectorAll('.section-heading, .project-card, .about-copy, .method-grid, .experience-row').forEach(el => {
-    el.classList.add('reveal'); observer.observe(el);
-  });
-}
+dialog?.addEventListener('close', () => {
+  document.documentElement.classList.remove('dialog-open');
+  document.dispatchEvent(new CustomEvent('portfolio:dialog',{detail:{open:false}}));
+  previousFocus?.focus();
+});

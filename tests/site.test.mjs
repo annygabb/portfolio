@@ -36,3 +36,21 @@ test('PageSpeed cover reserves its actual image aspect ratio',()=>{
  const tag=html.match(/<img[^>]+src="\/assets\/pagespeed-100.jpeg"[^>]*>/)[0];
  assert.match(tag,/width="1053" height="605"/);
 });
+test('home introduces Anny before work, skills and résumé in both languages',()=>{
+ for(const prefix of ['','en/']){
+  const html=readFileSync(`dist/${prefix}index.html`,'utf8');
+  const ids=['sobre','projetos','skills','curriculo'].map(id=>html.indexOf(`id="${id}"`));
+  assert.ok(ids.every(i=>i>=0),'all requested sections exist');
+  assert.ok(ids.every((v,i)=>!i||v>ids[i-1]),'requested reading order');
+  assert.match(html,/<h1[^>]*>[\s\S]*?Anny[\s\S]*?<\/h1>/);
+  assert.match(html,/<img[^>]*src="\/assets\/anny.webp"[^>]*width="400"[^>]*height="400"/);
+  assert.match(html,/<a[^>]*href="\/assets\/Anny-Gabrielly-Curriculo.pdf"[^>]*download/);
+ }
+});
+test('product cases explain frontend and backend contributions separately',()=>{
+ for(const slug of ['help','uaiconta'])for(const prefix of ['','en/']){
+  const html=readFileSync(`dist/${prefix}cases/${slug}/index.html`,'utf8');
+  assert.ok(html.includes('id="fullstack"'));
+  assert.match(html,/Front-end/);assert.match(html,/Back-end/);
+ }
+});

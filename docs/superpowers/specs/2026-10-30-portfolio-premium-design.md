@@ -72,3 +72,11 @@ Builder check concluído: desenho implementável, sem escolha material pendente.
 - Se retrato ou captura não estiver disponível, usar composição editorial com assets reais e texto; não bloquear o projeto nem fabricar telas.
 - Fontes adicionais verificadas via GitHub Actions: Help Validar HELP com sucesso na main no commit d984ba0b04823ed6f2b2ddb74d200148b48273f8 (run 40787778202); UaiConta V4 CI com sucesso na main no commit 16f6be99c9d2252bef15f1195773dda9774bcebe (run 38304583725). Conferir escopo dos jobs antes de detalhar testes aprovados.
 - Runs recentes do Orquestrador consultados são da branch feat/skill-discovery-orchestration; não atribuir automaticamente seus resultados à main.
+
+## Revisão solicitada pela usuária — retrato, ordem e motion
+
+O pedido posterior substitui a abertura com pastas por apresentação pessoal com foto `usar.jpg` em destaque. A sequência passa a ser: identidade/apresentação, projetos, skills com frontend/backend/automação e currículo baixável. Método autoral e experiência aprofundam o conteúdo depois das skills. A opção de download também fica disponível na abertura.
+
+Usar `Curriculo Anny (1).pdf` como download atual e fonte prioritária de formação/datas. Manter branco/azul e caligrafia; extrair dos novos anexos a distribuição de retrato, título forte, projetos e competências. Não copiar suas métricas ou adotar automaticamente cores escuras/laranja.
+
+GSAP 3.15.0, ScrollTrigger e Lenis 1.3.27 realizam entradas, rolagem suave no desktop e transformações 3D nas imagens. Sem longos pins e sem bloquear rolagem por toque; suporte a reduced-motion, fallback e limpeza do ticker. Cases Help, UaiConta e Orquestrador distinguem contribuição em front e backend.

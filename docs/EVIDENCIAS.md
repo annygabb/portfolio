@@ -2,7 +2,7 @@
 
 ## Perfil profissional
 
-Fonte canônica: `Profile(1).pdf` enviado nesta conversa, preservado como `public/assets/Anny-Gabrielly-Curriculo.pdf`.
+Fontes profissionais: `Profile(1).pdf` e o currículo atual `Curriculo Anny (1).pdf`, enviados nesta conversa. O currículo atual foi preservado sem modificação como `public/assets/Anny-Gabrielly-Curriculo.pdf`; tem prioridade para datas e formação complementar.
 
 - NTT DATA desde fevereiro/2026; freelance desde julho/2026.
 - Engenharia de Software, UniEVANGÉLICA, 2023–2026; conclusão prevista.
@@ -62,10 +62,18 @@ Navegador desktop, viewport aproximado 1348×926, 30/10/2026:
 | UaiConta | https://uaiconta.vercel.app/ | Tela pública de acesso |
 | Help | https://help-three-chi.vercel.app/ | Landing pública do projeto acadêmico |
 
-As capturas foram preservadas em JPG e convertidas para WebP; retrato recuperado do portfólio original. Capturas são evidência visual atual, não comparativo histórico. Não foram encontrados nos arquivos consultados baselines identificáveis para os três sites comerciais; não se inferiu ganho de vendas/contatos a partir de existência de CTA, SEO ou avaliações.
+As capturas foram preservadas em JPG e convertidas para WebP; retrato recuperado do portfólio original. O retrato anterior foi substituído em 30/10/2026 pela foto profissional `usar.jpg` enviada pela usuária (400×400), preservada também em WebP. Capturas são evidência visual atual, não comparativo histórico. Não foram encontrados nos arquivos consultados baselines identificáveis para os três sites comerciais; não se inferiu ganho de vendas/contatos a partir de existência de CTA, SEO ou avaliações.
 
 ## Referência de design
 
 Behance de Nastya Fedorchenko: https://www.behance.net/gallery/239103229/PORTFOLIO-2025-web-design-social-media-design
 
 A composição editorial, o contraste entre títulos pesados e caligrafia e as pastas inspiraram uma adaptação própria. Manrope/Pinyon Script são aproximações escolhidas; não são identificação confirmada das fontes originais. Pinterest não foi acessível.
+
+## Revisão do currículo e motion
+
+- Currículo atual: Instituto Auxiliadora jan/2025–jan/2026; TRE-GO mai–dez/2022; idiomas português nativo e inglês intermediário.
+- Formação complementar apresentada: Java e IA para Iniciantes (NTT DATA, 48h, 2025), trilhas Java/DevOps/Cloud (DIO), introdução à cibersegurança, SFC. RoboCode: 4º lugar em equipe em 2025; Campus Party Goiânia 2025. São estudos/participações, não certificações avançadas ou experiência profissional em AWS.
+- Bibliotecas oficiais: GSAP 3.15.0 e ScrollTrigger (https://github.com/greensock/GSAP) e Lenis 1.3.27 (https://github.com/darkroomengineering/lenis), instaladas do npm com versões fixas. Distribuições e avisos de licença são servidos localmente.
+- Skills oficiais consultadas: gsap-core, gsap-scrolltrigger e gsap-performance em https://github.com/greensock/gsap-skills. Não foi instalada uma skill de origem desconhecida.
+- GSAP usa transforms/opacity; Lenis compartilha o ticker GSAP sem RAF duplicado. Apenas desktop com ponteiro preciso tem scroll suavizado; mobile mantém rolagem nativa. Preferência por movimento reduzido evita a inicialização e o carregamento dos scripts opcionais de animação.
