@@ -27,6 +27,8 @@ const cards = [...document.querySelectorAll('.project-card')];
 function applyProjectFilter(value){
   document.querySelectorAll('[data-filter]').forEach(el=>el.setAttribute('aria-pressed',String(el.dataset.filter===value)));
   for(const card of cards)card.hidden=value!=='all'&&card.dataset.kind!==value;
+  const carousel=document.querySelector('[data-website-carousel]');
+  if(carousel)carousel.hidden=value!=='all'&&value!=='website';
   const status=document.querySelector('.filter-status');
   if(status)status.textContent=labels.count(cards.filter(el=>!el.hidden).length);
   document.dispatchEvent(new CustomEvent('portfolio:layout'));

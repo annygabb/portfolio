@@ -1,3 +1,4 @@
+import {mountContentMotion} from './content-motion.js';
 /** Progressive GSAP/ScrollTrigger + Lenis enhancement. Content is visible without it. */
 export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
   const noop=()=>{};
@@ -28,15 +29,8 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
     const dialogState=event=>{if(lenis){if(event.detail?.open)lenis.stop();else lenis.start();}};
     doc.addEventListener('click',resetNativeAnchor,true);
     doc.addEventListener('portfolio:dialog',dialogState);
-    const animate=(selector,vars)=>{
-      const targets=doc.querySelectorAll(selector);
-      if(targets.length)gsap.from(targets,vars);
-    };
-    animate('.hero-copy > *',{y:22,opacity:0,duration:0.75,stagger:0.075,ease:'power2.out',clearProps:'all'});
     const portrait=doc.querySelector('.portrait-depth');
     if(portrait){
-      const frame=doc.querySelector('.portrait-frame');
-      if(frame)gsap.from(frame,{y:30,opacity:0,duration:1,ease:'power2.out',clearProps:'all'});
       if(desktop)gsap.to(portrait,{y:-34,rotationY:-7,rotationX:4,z:28,ease:'none',scrollTrigger:{trigger:'.identity-hero',start:'top top',end:'bottom top',scrub:0.8}});
     }
     if(desktop){
@@ -46,15 +40,10 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
         if(elements.length)gsap.to(elements,{yPercent:speed,ease:'none',scrollTrigger:{trigger:layers,start:'top top',end:'bottom top',scrub:0.5}});
       }
     }
-    for(const bar of doc.querySelectorAll('.score-fill')){
-      gsap.from(bar,{scaleX:0,duration:1.1,ease:'power2.out',scrollTrigger:{trigger:bar,start:'top 94%',once:true},clearProps:'transform'});
-    }
-    for(const element of doc.querySelectorAll('.section-heading, .capability-column, .automation-capability, .resume-section')){
-      gsap.from(element,{y:desktop?26:14,opacity:0.35,duration:0.75,ease:'power2.out',clearProps:'all',scrollTrigger:{trigger:element,start:'top 94%',once:true}});
-    }
     const projectShape=()=>[win.innerWidth,win.innerHeight,...[...doc.querySelectorAll('.project-stage:not([hidden])')].map(stage=>{
       const scene=stage.querySelector('.project-scene'),available=win.innerHeight-(doc.querySelector('.site-header')?.offsetHeight||0);
-      return !!scene && scene.scrollHeight>available+2;
+      const detail=stage.querySelector('.project-tool-detail'),panel=stage.querySelector('.tool-transition');
+      return [!!scene&&scene.scrollHeight>available+2,!!detail?.open,!!panel&&panel.offsetHeight>available].join(',');
     })].join('|');
     let lastShape;
     const refreshProjects=()=>{
@@ -68,8 +57,15 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
         if(!screen || !scene || scene.scrollHeight>available+2)continue;
         // The screen stays fixed; its child travels through actual perspective space.
         projectTweens.push(gsap.fromTo(scene,{x:0,y:0,rotationX:18,rotationY:-6,z:-650,yPercent:14,scale:0.88,opacity:0.45},{x:0,y:0,rotationX:0,rotationY:0,z:0,yPercent:0,scale:1,opacity:1,ease:'none',scrollTrigger:{trigger:screen,start:'top bottom',end:()=>`top top+=${header()}`,scrub:0.65,invalidateOnRefresh:true}}));
-        projectTweens.push(gsap.fromTo(scene,{x:0,y:0,rotationX:0,rotationY:0,z:0,yPercent:0,scale:1,opacity:1},{x:0,y:0,rotationX:-18,rotationY:6,z:-650,yPercent:-8,scale:0.88,opacity:0.3,immediateRender:false,ease:p=>Math.max(0,(p-0.55)/0.45),scrollTrigger:{trigger:screen,start:()=>`top top+=${header()}`,end:()=>`+=${Math.round(available*1.4)}`,pin:screen,pinSpacing:!!stage.querySelector('.project-tool-detail') || index===stages.length-1,scrub:0.65,invalidateOnRefresh:true}}));
+        projectTweens.push(gsap.fromTo(scene,{x:0,y:0,rotationX:0,rotationY:0,z:0,yPercent:0,scale:1,opacity:1},{x:0,y:0,rotationX:-18,rotationY:6,z:-650,yPercent:-8,scale:0.88,opacity:0.3,immediateRender:false,ease:p=>Math.max(0,(p-0.55)/0.45),scrollTrigger:{trigger:screen,start:()=>`top top+=${header()}`,end:()=>`+=${Math.round(available*1.4)}`,pin:screen,pinSpacing:stage.querySelector('.project-tool-detail')?!stage.querySelector('.project-tool-detail').open:index===stages.length-1,scrub:0.65,invalidateOnRefresh:true}}));
         if(visual)projectTweens.push(gsap.fromTo(visual,{z:0,yPercent:2},{z:70,yPercent:-3,ease:'none',scrollTrigger:{trigger:screen,start:()=>`top top+=${header()}`,end:()=>`+=${Math.round(available*.75)}`,scrub:0.65,invalidateOnRefresh:true}}));
+      }
+      if(context.conditions.staged)for(const stage of stages){
+        const panel=stage.querySelector('.tool-transition'),depth=stage.querySelector('.tool-detail-depth');
+        const detail=stage.querySelector('.project-tool-detail'),available=win.innerHeight-(doc.querySelector('.site-header')?.offsetHeight||0);
+        if(!panel||!depth||!detail?.open||panel.offsetHeight<=available)continue;
+        projectTweens.push(gsap.fromTo(depth,{x:0,y:80,rotationX:18,rotationY:-6,z:-650,scale:.88,opacity:.45},{x:0,y:0,rotationX:0,rotationY:0,z:0,scale:1,opacity:1,ease:'none',scrollTrigger:{trigger:panel,start:'top bottom',end:()=>`top top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,scrub:.65,invalidateOnRefresh:true}}));
+        projectTweens.push(gsap.fromTo(depth,{x:0,y:0,rotationX:0,rotationY:0,z:0,scale:1,opacity:1},{x:0,y:-80,rotationX:-18,rotationY:6,z:-650,scale:.88,opacity:.35,immediateRender:false,ease:'none',scrollTrigger:{trigger:panel,start:'bottom bottom',end:()=>`bottom top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,scrub:.65,invalidateOnRefresh:true}}));
       }
       for(const frame of doc.querySelectorAll('.case-cover > img')){
         projectTweens.push(gsap.fromTo(frame,{y:desktop?22:10,scale:0.98},{y:0,scale:1,ease:'none',scrollTrigger:{trigger:frame.parentElement,start:'clamp(top 96%)',end:'clamp(center 67%)',scrub:0.7,invalidateOnRefresh:true}}));
@@ -78,39 +74,7 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
       if(Number.isFinite(previousY)){if(lenis)lenis.scrollTo(previousY,{immediate:true,force:true});else win.scrollTo({top:previousY,behavior:'instant'});}
       lastShape=projectShape();
     };
-    // Recorded values stay in HTML; only their presentation is animated.
-    for(const number of doc.querySelectorAll('[data-count-to]')){
-      const final=number.textContent, state={value:0}, target=Number(number.getAttribute('data-count-to')), catalog=number.closest?.('.catalog-ruler');
-      restoreContent.push(()=>{number.textContent=final;});
-      number.textContent='0';
-      gsap.to(state,{value:target,duration:catalog?2.1:1.8,ease:catalog?'power2.inOut':'power2.out',onUpdate:()=>{number.textContent=String(Math.round(state.value));},scrollTrigger:{trigger:catalog||number,start:'top 82%',once:true}});
-    }
-    for(const chart of doc.querySelectorAll('.quality-lines')){
-      const trigger={trigger:chart,start:'top 82%',once:true};
-      gsap.fromTo(chart.querySelectorAll('.quality-line'),{strokeDasharray:'1 1',strokeDashoffset:1},{strokeDasharray:'1 1',strokeDashoffset:0,autoRound:false,duration:2.2,stagger:0.3,ease:'power1.inOut',scrollTrigger:trigger});
-      for(const selector of ['.quality-node','.quality-value'])gsap.fromTo(chart.querySelectorAll(selector),{opacity:0},{opacity:1,duration:0.35,stagger:0.16,delay:0.2,ease:'power1.out',scrollTrigger:trigger});
-      gsap.fromTo(chart.querySelectorAll('tbody tr'),{opacity:0,y:12},{opacity:1,y:0,duration:0.6,stagger:0.35,delay:0.4,scrollTrigger:trigger});
-    }
-    for(const chart of doc.querySelectorAll('.catalog-ruler')){
-      const trigger={trigger:chart,start:'top 82%',once:true};
-      gsap.fromTo(chart.querySelector('.catalog-progress'),{strokeDasharray:'1 1',strokeDashoffset:1},{strokeDasharray:'1 1',strokeDashoffset:0,autoRound:false,duration:2.1,ease:'power2.inOut',scrollTrigger:trigger});
-      gsap.fromTo(chart.querySelector('.catalog-marker'),{attr:{cx:30}},{attr:{cx:560},duration:2.1,ease:'power2.inOut',scrollTrigger:trigger});
-      gsap.fromTo(chart.querySelectorAll('.catalog-tick, svg text'),{opacity:0},{opacity:1,duration:0.4,stagger:0.15,scrollTrigger:trigger});
-    }
-    const history=[...doc.querySelectorAll('.freelance, .earlier-history')];
-    if(history.length && win.IntersectionObserver){
-      // Use the actual visible area, independent of the upstream pin spacing.
-      const observer=new win.IntersectionObserver(entries=>{
-        for(const entry of entries){
-          const available=entry.rootBounds?.height || win.innerHeight-(doc.querySelector('.site-header')?.offsetHeight||0);
-          const height=entry.boundingClientRect?.height || available;
-          const maxRatio=height>0 && available>0?Math.min(1,available/height):1;
-          entry.target.style.opacity=String(Math.min(1,entry.intersectionRatio/(maxRatio*0.65)));
-        }
-      },{threshold:Array.from({length:21},(_,i)=>i/20),rootMargin:`-${doc.querySelector('.site-header')?.offsetHeight||0}px 0px 0px 0px`});
-      history.forEach(element=>observer.observe(element));
-      restoreContent.push(()=>{observer.disconnect();history.forEach(element=>element.style.removeProperty('opacity'));});
-    }
+    const disposeContent=mountContentMotion({win,doc,gsap});
     const thread=doc.querySelector('.thread-progress'), tip=doc.querySelector('.thread-tip');
     if(thread){
       const state={progress:0},length=thread.getTotalLength();
@@ -133,20 +97,29 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
     const resize=()=>{win.clearTimeout(resizeTimer);resizeTimer=win.setTimeout(refresh,120);};
     win.addEventListener('resize',resize);
     const details=[...doc.querySelectorAll('details')];
-    details.forEach(el=>el.addEventListener('toggle',refresh));
+    const onToggle=event=>{
+      refresh();
+      const summary=event.currentTarget.querySelector('summary');
+      if(summary && doc.activeElement===summary){
+        const top=summary.getBoundingClientRect().top,header=doc.querySelector('.site-header')?.offsetHeight||0;
+        if(top<header || top>win.innerHeight-summary.offsetHeight){summary.scrollIntoView({block:'start',behavior:'instant'});lenis?.reset();ScrollTrigger.update();}
+      }
+    };
+    details.forEach(el=>el.addEventListener('toggle',onToggle));
     const assets=[...doc.querySelectorAll('img')].filter(img=>!img.complete);
     assets.forEach(img=>img.addEventListener('load',refresh,{once:true}));
     let active=true;
     doc.fonts?.ready.then(()=>{if(active)refresh();});
     return ()=>{
       active=false;
+      disposeContent();
       restoreContent.forEach(restore=>restore());
       win.removeEventListener('resize',resize);
       win.clearTimeout(resizeTimer);
       doc.removeEventListener('portfolio:layout',layoutHandler);
       doc.removeEventListener('click',resetNativeAnchor,true);
       doc.removeEventListener('portfolio:dialog',dialogState);
-      details.forEach(el=>el.removeEventListener('toggle',refresh));
+      details.forEach(el=>el.removeEventListener('toggle',onToggle));
       assets.forEach(img=>img.removeEventListener('load',refresh));
       projectTweens.slice().reverse().forEach(tween=>tween.revert());projectTweens=[];
       if(tick)gsap.ticker.remove(tick);

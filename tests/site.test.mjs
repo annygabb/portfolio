@@ -61,7 +61,8 @@ test('revised home preserves evidence values and removes the investment section'
   const html=readFileSync(`dist/${prefix}index.html`,'utf8');
   assert.ok(!html.includes('id="contratar"'));
   assert.ok(!html.includes('hero-profile-strip'));
-  assert.equal((html.match(/class="project-card project-stage/g)||[]).length,7);
+  assert.equal((html.match(/class="project-card project-stage/g)||[]).length,4);
+  assert.equal((html.match(/class="project-card website-slide/g)||[]).length,3);
   assert.ok(html.includes('data-parallax-layers'));
   assert.ok(html.includes('<td>94</td>'));
   for(const slug of ['pagespeed-seo-optimizer','orquestrador-de-sites'])assert.ok(html.includes(`<details class="tool-detail project-tool-detail container" id="tool-${slug}" open>`));

@@ -68,42 +68,35 @@ test('short desktop windows keep project content fully visible in natural scroll
 });
 
 test('project scenes also pin with a coarse pointer when the viewport fits',()=>{
- const f=fixture({desktop:false}),screen={},visual={},scene={},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:visual};
+ const f=fixture({desktop:false}),screen={},visual={},scene={},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:q==='.stage-visual'?visual:null};
  const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
  const recorded=[];f.gsap.fromTo=(target,from,to)=>{recorded.push({target,from,to});return {revert(){}}};
  const cleanup=mountMotion(f);assert.ok(recorded.some(x=>x.to.scrollTrigger.pin===screen));assert.ok(recorded.some(x=>x.target===scene&&x.from.scale<.95&&x.to.scale===1));assert.equal(f.state.created,0);cleanup();
 });
 
 test('project content taller than the available viewport never gets pinned or clipped by motion',()=>{
- const f=fixture(),screen={},visual={},scene={scrollHeight:900},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:visual};f.win.innerHeight=700;
+ const f=fixture(),screen={},visual={},scene={scrollHeight:900},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:q==='.stage-visual'?visual:null};f.win.innerHeight=700;
  const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
  let transitions=0;f.gsap.fromTo=()=>{transitions++;return {revert(){}}};const cleanup=mountMotion(f);assert.equal(transitions,0);cleanup();
 });
 
 test('resize reevaluates whether a project still fits before rebuilding its pin',()=>{
- const f=fixture(),screen={},visual={},scene={scrollHeight:800},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:visual};f.win.innerHeight=936;
+ const f=fixture(),screen={},visual={},scene={scrollHeight:800},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:q==='.stage-visual'?visual:null};f.win.innerHeight=936;
  const callbacks=new Map();f.win.addEventListener=(name,fn)=>callbacks.set(name,fn);f.win.removeEventListener=name=>callbacks.delete(name);
  const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
  let pins=0,reverts=0;f.gsap.fromTo=(target,from,to)=>{if(to.scrollTrigger.pin)pins++;return {revert(){reverts++}}};
  const cleanup=mountMotion(f);assert.equal(pins,1);f.win.innerHeight=700;callbacks.get('resize')();assert.equal(pins,1);assert.equal(reverts,3);f.win.innerHeight=936;callbacks.get('resize')();assert.equal(pins,2);cleanup();assert.equal(callbacks.has('resize'),false);
 });
 
-test('animated counts progress numerically and restore their real value on cleanup',()=>{
- const f=fixture(),number={textContent:'60',getAttribute:()=> '60'};const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='[data-count-to]'?[number]:original(q);
- const calls=[];f.gsap.to=(state,vars)=>{calls.push({state,vars});return {revert(){}}};const cleanup=mountMotion(f);assert.equal(number.textContent,'0');assert.equal(calls[0].vars.value,60);assert.equal(calls[0].vars.scrollTrigger.once,true);
- calls[0].state.value=31.8;calls[0].vars.onUpdate();assert.equal(number.textContent,'32');calls[0].state.value=60;calls[0].vars.onUpdate();assert.equal(number.textContent,'60');cleanup();assert.equal(number.textContent,'60');
-});
-test('evidence charts draw real paths and move the catalog marker only after viewport entry',()=>{
- const f=fixture(),line={},marker={},chart={querySelector:q=>q==='.catalog-progress'?line:marker,querySelectorAll:()=>[]};const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.catalog-ruler'?[chart]:original(q);
- const calls=[];f.gsap.fromTo=(target,from,to)=>{calls.push({target,from,to});return {revert(){}}};mountMotion(f);assert.ok(calls.some(x=>x.target===line&&x.from.strokeDashoffset===1&&x.to.strokeDashoffset===0&&x.to.scrollTrigger.once));assert.ok(calls.some(x=>x.target===marker&&x.from.attr.cx===30&&x.to.attr.cx===560));
-});
-
 test('rebuilding project pins preserves the current scroll destination',()=>{
  const f=fixture();f.win.scrollY=12000;const cleanup=mountMotion(f);assert.equal(f.state.restoredY,12000);f.state.restoredY=undefined;f.listeners.get('portfolio:layout')();assert.equal(f.state.restoredY,12000);cleanup();
 });
 
-test('career history fades with actual viewport visibility and restores readable content on cleanup',()=>{
- const f=fixture(),element={style:{opacity:'',removeProperty(){this.opacity=''}}},original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.freelance, .earlier-history'?[element]:original(q);
- let callback,disconnected=false;f.win.IntersectionObserver=class{constructor(fn){callback=fn}observe(){}disconnect(){disconnected=true}};
- const cleanup=mountMotion(f);callback([{target:element,intersectionRatio:0}]);assert.equal(element.style.opacity,'0');callback([{target:element,intersectionRatio:1}]);assert.equal(element.style.opacity,'1');callback([{target:element,intersectionRatio:.325}]);assert.equal(element.style.opacity,'0.5');callback([{target:element,intersectionRatio:.5,rootBounds:{height:600},boundingClientRect:{height:1200}}]);assert.equal(element.style.opacity,'1','tall history must be fully readable at maximum visible area');cleanup();assert.equal(disconnected,true);assert.equal(element.style.opacity,'');
+
+test('closed or short tool details never receive overlapping 3D entry and exit effects',()=>{
+ const f=fixture();f.win.innerHeight=936;const screen={},scene={scrollHeight:854},visual={},detail={open:false},panel={offsetHeight:100},depth={};
+ const stage={querySelector:q=>({'.project-screen':screen,'.project-scene':scene,'.stage-visual':visual,'.project-tool-detail':detail,'.tool-transition':panel,'.tool-detail-depth':depth}[q]||null)},original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
+ const calls=[];f.gsap.fromTo=(target,from,to)=>{calls.push({target,to});return {revert(){}}};const cleanup=mountMotion(f);assert.equal(calls.filter(x=>x.target===depth).length,0);
+ detail.open=true;panel.offsetHeight=1500;f.listeners.get('portfolio:layout')();assert.equal(calls.filter(x=>x.target===depth).length,2);
+ const before=calls.length;panel.offsetHeight=200;f.listeners.get('portfolio:layout')();assert.equal(calls.slice(before).filter(x=>x.target===depth).length,0);cleanup();
 });
