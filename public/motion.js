@@ -5,7 +5,7 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
   gsap.registerPlugin(ScrollTrigger);
   const media=gsap.matchMedia();
   let disposed=false;
-  media.add({desktop:'(min-width: 901px) and (pointer: fine)',staged:'(min-width: 901px) and (min-height: 700px) and (pointer: fine)',motion:'(prefers-reduced-motion: no-preference)'}, context=>{
+  media.add({desktop:'(min-width: 901px) and (pointer: fine)',staged:'(min-width: 768px) and (min-height: 700px)',motion:'(prefers-reduced-motion: no-preference)'}, context=>{
     if(!context.conditions.motion) return noop;
     const desktop=context.conditions.desktop;
     let lenis, tick, projectTweens=[];
@@ -55,8 +55,11 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
       projectTweens.forEach(tween=>tween.revert());projectTweens=[];
       const stages=[...doc.querySelectorAll('.project-stage:not([hidden])')];
       if(context.conditions.staged)for(const stage of stages){
-        const screen=stage.querySelector('.project-screen'), visual=stage.querySelector('.stage-visual');
-        if(screen&&visual)projectTweens.push(gsap.fromTo(visual,{yPercent:4,scale:0.96},{yPercent:-5,scale:1.035,ease:'none',scrollTrigger:{trigger:screen,start:()=>`top top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,end:()=>`+=${Math.round(win.innerHeight*.85)}`,pin:screen,pinSpacing:true,scrub:0.7,invalidateOnRefresh:true}}));
+        const screen=stage.querySelector('.project-screen'), visual=stage.querySelector('.stage-visual'), scene=stage.querySelector('.project-scene');
+        const available=win.innerHeight-(doc.querySelector('.site-header')?.offsetHeight||0);
+        if(scene && scene.scrollHeight>available+2)continue;
+        if(scene)projectTweens.push(gsap.fromTo(scene,{scale:0.90,clipPath:'inset(6% 3% 6% 3% round 12px)'},{scale:1,clipPath:'inset(0% 0% 0% 0% round 0px)',ease:'none',scrollTrigger:{trigger:screen,start:'top 90%',end:()=>`top top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,scrub:0.5,invalidateOnRefresh:true}}));
+        if(screen&&visual)projectTweens.push(gsap.fromTo(visual,{yPercent:5,scale:0.96},{yPercent:-5,scale:1.07,ease:'none',scrollTrigger:{trigger:screen,start:()=>`top top+=${doc.querySelector('.site-header')?.offsetHeight||0}`,end:()=>`+=${Math.round(win.innerHeight*.85)}`,pin:screen,pinSpacing:true,scrub:0.7,invalidateOnRefresh:true}}));
       }
       for(const frame of doc.querySelectorAll('.case-cover > img')){
         projectTweens.push(gsap.fromTo(frame,{y:desktop?22:10,scale:0.98},{y:0,scale:1,ease:'none',scrollTrigger:{trigger:frame.parentElement,start:'clamp(top 96%)',end:'clamp(center 67%)',scrub:0.7,invalidateOnRefresh:true}}));
@@ -71,7 +74,10 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
     }else layoutHandler=refreshProjects;
     layoutHandler();
     doc.addEventListener('portfolio:layout',layoutHandler);
-    const refresh=()=>{lenis?.resize?.();ScrollTrigger.refresh();};
+    const refresh=()=>layoutHandler();
+    let resizeTimer;
+    const resize=()=>{win.clearTimeout(resizeTimer);resizeTimer=win.setTimeout(refresh,120);};
+    win.addEventListener('resize',resize);
     const details=[...doc.querySelectorAll('details')];
     details.forEach(el=>el.addEventListener('toggle',refresh));
     const assets=[...doc.querySelectorAll('img')].filter(img=>!img.complete);
@@ -80,6 +86,8 @@ export function mountMotion({win,doc,gsap,ScrollTrigger,Lenis}) {
     doc.fonts?.ready.then(()=>{if(active)refresh();});
     return ()=>{
       active=false;
+      win.removeEventListener('resize',resize);
+      win.clearTimeout(resizeTimer);
       doc.removeEventListener('portfolio:layout',layoutHandler);
       doc.removeEventListener('click',resetNativeAnchor,true);
       doc.removeEventListener('portfolio:dialog',dialogState);

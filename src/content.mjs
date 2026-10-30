@@ -148,3 +148,8 @@ projects.find(p=>p.slug==='orquestrador-de-sites').layers=[
  {name:'Front-end',body:['Catálogo com busca, filtros, seleção e confirmação em etapas. Skills e referências externas aparecem com identificação própria.','A catalog with search, filters, selection and staged confirmation. Skills and external references have distinct labels.'],tech:['Next.js','MCP Apps','Interface de seleção']},
  {name:'Back-end',body:['Endpoint MCP e fluxo de propostas com validação de entrada e origem, Turnstile e limites de envio. A GitHub App cria branch e Pull Request para revisão.','An MCP endpoint and proposal flow with input and origin validation, Turnstile and submission limits. The GitHub App creates a branch and Pull Request for review.'],tech:['MCP','GitHub App','Turnstile','Validação']}
 ];
+
+export function stackLabel(value,lang){
+ const english={'SEO técnico':'Technical SEO','Acessibilidade':'Accessibility','Responsividade':'Responsive design','Experiência do usuário':'User experience'};
+ return lang==='en'?(english[value]||value):value;
+}

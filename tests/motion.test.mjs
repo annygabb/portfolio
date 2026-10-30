@@ -5,9 +5,9 @@ function fixture({reduce=false,desktop=true,shortViewport=false}={}){
  const classes=new Set(),listeners=new Map(),ticks=new Set(),state={created:0,destroyed:0,frames:[],refresh:0,reverted:0,resets:0,stops:0,starts:0};
  const root={classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}};
  const doc={documentElement:root,querySelector:()=>null,querySelectorAll:()=>[],addEventListener:(k,v)=>listeners.set(k,v),removeEventListener:(k)=>listeners.delete(k)};
- const win={location:{href:'https://portfolio.example/'},matchMedia:q=>({matches:q.includes('reduced-motion')?reduce:desktop}),addEventListener(){},removeEventListener(){}};
+ const win={location:{href:'https://portfolio.example/'},matchMedia:q=>({matches:q.includes('reduced-motion')?reduce:desktop}),addEventListener(){},removeEventListener(){},clearTimeout(){},setTimeout:fn=>{fn();return 1}};
  const ScrollTrigger={update(){},refresh(){state.refresh++}};
- const gsap={registerPlugin(){},ticker:{add:f=>ticks.add(f),remove:f=>ticks.delete(f),lagSmoothing(){}},matchMedia(){return {add(q,fn){const context={conditions:{desktop,staged:desktop&&!shortViewport,motion:!reduce}};context.add=(name,method)=>{context[name]=method};this.cleanup=fn(context)},revert(){state.reverted++;this.cleanup?.()}}},from(){return {revert(){}}},fromTo(){return {revert(){}}},to(){return {revert(){}}}};
+ const gsap={registerPlugin(){},ticker:{add:f=>ticks.add(f),remove:f=>ticks.delete(f),lagSmoothing(){}},matchMedia(){return {add(q,fn){const context={conditions:{desktop,staged:!shortViewport,motion:!reduce}};context.add=(name,method)=>{context[name]=method};this.cleanup=fn(context)},revert(){state.reverted++;this.cleanup?.()}}},from(){return {revert(){}}},fromTo(){return {revert(){}}},to(){return {revert(){}}}};
  class Lenis{constructor(options){state.created++;state.options=options}on(){}off(){}raf(t){state.frames.push(t)}stop(){state.stops++}start(){state.starts++}reset(){state.resets++}destroy(){state.destroyed++}}
  return {win,doc,gsap,ScrollTrigger,Lenis,ticks,listeners,state,classes};
 }
@@ -50,7 +50,7 @@ test('opening a proof dialog stops background scrolling and closing resumes it',
 });
 
 test('project scenes pin the viewport while animating their visual child and clean up',()=>{
- const f=fixture(),screen={},visual={},stage={querySelector:q=>q==='.project-screen'?screen:visual};
+ const f=fixture(),screen={},visual={},stage={querySelector:q=>q==='.project-screen'?screen:q==='.stage-visual'?visual:null};
  const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
  const recorded=[];let reverted=0;f.gsap.fromTo=(target,from,to)=>{recorded.push({target,from,to});return {revert(){reverted++}}};
  const cleanup=mountMotion(f);assert.equal(recorded.length,1);assert.equal(recorded[0].target,visual);assert.equal(recorded[0].to.scrollTrigger.pin,screen);assert.equal(recorded[0].to.scrollTrigger.pinSpacing,true);
@@ -62,4 +62,25 @@ test('short desktop windows keep project content fully visible in natural scroll
  const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[a,b]:original(q);
  let transitions=0;f.gsap.fromTo=()=>{transitions++;return {revert(){}}};
  const cleanup=mountMotion(f);assert.equal(transitions,0);assert.equal(f.state.created,1);cleanup();
+});
+
+test('project scenes also pin with a coarse pointer when the viewport fits',()=>{
+ const f=fixture({desktop:false}),screen={},visual={},scene={},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:visual};
+ const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
+ const recorded=[];f.gsap.fromTo=(target,from,to)=>{recorded.push({target,from,to});return {revert(){}}};
+ const cleanup=mountMotion(f);assert.ok(recorded.some(x=>x.to.scrollTrigger.pin===screen));assert.ok(recorded.some(x=>x.target===scene&&x.from.scale<.95&&x.to.scale===1));assert.equal(f.state.created,0);cleanup();
+});
+
+test('project content taller than the available viewport never gets pinned or clipped by motion',()=>{
+ const f=fixture(),screen={},visual={},scene={scrollHeight:900},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:visual};f.win.innerHeight=700;
+ const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
+ let transitions=0;f.gsap.fromTo=()=>{transitions++;return {revert(){}}};const cleanup=mountMotion(f);assert.equal(transitions,0);cleanup();
+});
+
+test('resize reevaluates whether a project still fits before rebuilding its pin',()=>{
+ const f=fixture(),screen={},visual={},scene={scrollHeight:800},stage={querySelector:q=>q==='.project-screen'?screen:q==='.project-scene'?scene:visual};f.win.innerHeight=936;
+ const callbacks=new Map();f.win.addEventListener=(name,fn)=>callbacks.set(name,fn);f.win.removeEventListener=name=>callbacks.delete(name);
+ const original=f.doc.querySelectorAll;f.doc.querySelectorAll=q=>q==='.project-stage:not([hidden])'?[stage]:original(q);
+ let pins=0,reverts=0;f.gsap.fromTo=(target,from,to)=>{if(to.scrollTrigger.pin)pins++;return {revert(){reverts++}}};
+ const cleanup=mountMotion(f);assert.equal(pins,1);f.win.innerHeight=700;callbacks.get('resize')();assert.equal(pins,1);assert.equal(reverts,2);f.win.innerHeight=936;callbacks.get('resize')();assert.equal(pins,2);cleanup();assert.equal(callbacks.has('resize'),false);
 });
