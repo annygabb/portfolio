@@ -120,3 +120,7 @@ body:has(.centered-hero) .site-header{background:#091425;color:#f1eadf;border-co
 .quality-lines .line-1{stroke-dasharray:7 4}.quality-lines .line-2{stroke-dasharray:2 4}
 :root[data-theme=dark] .tech-logo img[src$="github.svg"],:root[data-theme=dark] .tech-logo img[src$="vercel.svg"]{filter:invert(1)}
 @media(max-width:600px){.centered-hero .hero-artboard{height:650px}.centered-hero .portrait-stage{bottom:225px}}
+/* Transparent portrait asset replaces all previous clipping/masking attempts. */
+.centered-hero .portrait-frame img{mask:none!important;-webkit-mask:none!important;clip-path:none!important;object-fit:contain;object-position:center;width:100%;height:auto;max-height:none;filter:none!important}.centered-hero .portrait-stage{left:50%;bottom:25px;width:400px;max-width:calc(100% - 24px);filter:drop-shadow(0 9px 22px #050d1b38)!important}.centered-hero .hero-artboard{overflow:visible}.centered-hero .portrait-frame{overflow:visible}
+@media(min-width:601px) and (max-width:1000px){.centered-hero .portrait-stage{width:360px;bottom:20px}}
+@media(max-width:600px){.centered-hero .portrait-stage{width:320px;max-width:calc(100% - 20px);left:50%;bottom:220px}}

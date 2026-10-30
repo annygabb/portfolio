@@ -17,3 +17,6 @@ Pinterest fornecido não acessível pela ferramenta de leitura; o comportamento 
 Verificação final: 36 testes aprovados, incluindo expansão inline, preservação de navegação modificada e associação/limpeza dos tweens da sequência de projetos. Logos locais e todos os links das 16 rotas conferidos pelo build/testes.
 
 Revisão independente: corrigida a rotação de texto nas ferramentas ao restringir o seletor legado ao ícone dos details anteriores. A animação de projetos agora usa a mesma condição de altura, largura e ponteiro do sticky CSS; em janelas baixas o conteúdo não perde contraste.
+
+## Correção do retrato
+Após feedback de fundo residual e corte, removidos mask/clipPath do retrato. Novo asset transparente produzido por remoção de fundo com imagegen, preservando enquadramento completo solicitado. JPEG original mantido; o asset é um derivado, não uma máscara aplicada aos pixels originais. Exibição usa contain, centralização exata, margem interna lateral e folga inferior. Sombra única discreta em azul escuro (#050d1b38), sem halo branco. O recorte vetorial antigo deixou de ser utilizado. Inspeção visual autenticada continua pendente.
