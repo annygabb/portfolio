@@ -1,5 +1,5 @@
 # Redesign do portfólio — Anny Gabrielly
-Data: 30/10/2026. Estado: proposta para aprovação de design; implementação ainda não iniciada.
+Data: 30/10/2026. Estado: design aprovado pela usuária; implementação no PR #1, testes automatizados aprovados, QA visual pendente de acesso à prévia protegida.
 
 ## Intenção
 Apresentar Anny como Analista de Sistemas e Desenvolvedora Full-Stack que constrói produtos e automatiza processos. Público prioritário confirmado: recrutadores de tecnologia. Tornar claras sua contribuição, decisões técnicas, capacidade de entrega e resultados com fontes.
