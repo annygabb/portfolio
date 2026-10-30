@@ -28,6 +28,6 @@ As seis capturas de sites foram convertidas para WebP; carregamento adiado fora 
 
 ## QA visual
 
-Pendente de publicação da prévia privada.
+Prévia privada publicada com sucesso em https://anny-portfolio-premium-review.suportesistemahelp.chatgpt.site. O navegador remoto chegou ao login, sem sessão autenticada.\n\nA Vercel também confirmou deploy READY no comentário do PR #1 e status de sucesso do commit c57c0e1164346d840e0ff1906c74fdd9297ea0d9. Prévia automática: https://portfolioanny-git-redesi-10594a-annygabbyoficial-5107s-projects.vercel.app. Ela exige Vercel Authentication.\n\nA revisão automática de permissões rejeitou a criação/reutilização de um link temporário por ampliar acesso sem autorização explícita. Nenhuma proteção foi desativada; QA visual em desktop/mobile, interações ao vivo e console permanecem pendentes. Os testes automatizados e a revisão de código não substituem essa etapa.
 
 Não foi executado Lighthouse remoto/local nesta etapa. Não alegar nota 95+ para o novo portfólio sem medição.
