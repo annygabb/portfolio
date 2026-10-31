@@ -1,0 +1,9 @@
+# Restauração do loading solicitado e cor do cursor por tema
+
+Substitui a decisão de trocar a animação numérica por uma marca tipográfica. A referência solicitada é https://br.pinterest.com/pin/571957221449547099/. O MP4 efetivamente disponível tem 702×396 pixels. Ampliá-lo não aumenta sua definição.
+
+A abertura agora usa posições e luminosidade de dígitos extraídas de 67 quadros da referência. O arquivo numeric-motion-v1.bin (323.566 bytes) guarda coordenadas de origem/destino e opacidade, com interpolação entre quadros. O navegador redesenha 0 e 1 em texto nativo sobre #091425, em canvas ajustado à densidade da tela até DPR 2. A forma e a movimentação vêm da referência; os glifos foram reconstruídos para evitar ampliar pixels. Não é uma cópia pixel a pixel ou um vídeo HD obtido da fonte. O trecho final expande os números e dissolve o fundo para revelar o hero. Duração de animação: 3,5 s; liberação de segurança: 4,5 s no módulo e 5 s no bootstrap. Erro de dados/contexto libera o conteúdo. Sem novo runtime gráfico ou dependência de vídeo.
+
+A marca tipográfica deixou de substituir o efeito. O footer continua sem o nome animado e com gradiente. Seu rastro mantém limite de 44 px, 2 px e 190 ms. A cor consulta o tema a cada frame: claro #2455d6; escuro #ffffff. Trocar de tema atualiza o desenho sem remontar a página. Sem ondas ou animação de texto no footer.
+
+Testes cobrem formato e truncamento dos dados, desenho de glifos em DPR 2, expansão/saída única, rede pendente/falha, resposta após teardown, chegada por âncora sem fetch e cor do rastro durante troca de tema. QA desktop confirmou carregamento dos dados, números reconstruídos nítidos e saída ao hero. Não houve medição Lighthouse ou nova QA visual mobile. SEO/AEO/GEO, currículo localizado, retrato e demais cases preservados.

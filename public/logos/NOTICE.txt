@@ -1,0 +1,3 @@
+Technology icons downloaded from https://github.com/devicons/devicon (MIT).
+Individual logos remain trademarks of their respective owners. Used to identify technologies in Anny Gabrielly's portfolio.
+GSAP, Lenis, ServiceNow and Power Automate are identified using text wordmarks, rather than invented pictorial logos.
