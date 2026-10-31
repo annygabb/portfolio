@@ -12,16 +12,22 @@ export function mountVapour({win,doc,root}){
   if(!root||!win.IntersectionObserver||win.matchMedia('(prefers-reduced-motion: reduce)').matches)return ()=>{};
   const canvas=root.querySelector('canvas'),text=root.querySelector('.closing-watermark'),ctx=canvas?.getContext('2d');
   if(!ctx)return ()=>{};
-  let frame=0,start=0,active=false,disposed=false,points=[],width=0,height=0,font='',color='',baseline=0;
+  let frame=0,start=0,active=false,disposed=false,points=[],width=0,height=0,font='',color='',baseline=0,layout=[];
   const build=()=>{
     const style=win.getComputedStyle(text);width=root.clientWidth;height=root.clientHeight;
     if(!width||!height)return;
     const ratio=Math.min(win.devicePixelRatio||1,1.5);canvas.width=Math.round(width*ratio);canvas.height=Math.round(height*ratio);ctx.setTransform(ratio,0,0,ratio,0,0);
     font=`${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;color=style.color;baseline=height*.76;
+    const names=[...text.querySelectorAll('span')];
+    layout=names.length?names.map((name,i)=>{
+      const row=height/names.length,size=row*.85;ctx.font=`${style.fontWeight} ${size}px ${style.fontFamily}`;
+      const fit=Math.min(size,size*(width*.94)/ctx.measureText(name.textContent).width);
+      return {text:name.textContent,font:`${style.fontWeight} ${fit}px ${style.fontFamily}`,y:row*i+row*.73};
+    }):[{text:text.textContent,font,y:baseline}];
     const sample=doc.createElement('canvas');sample.width=width;sample.height=height;const ink=sample.getContext('2d');
-    ink.font=font;ink.textAlign='center';ink.fillText(text.textContent,width/2,baseline,width-8);
+    ink.textAlign='center';for(const line of layout){ink.font=line.font;ink.fillText(line.text,width/2,line.y,width*.96);}
     const pixels=ink.getImageData(0,0,width,height).data;points=[];
-    const step=width<600?3:4;
+    const step=Math.max(3,Math.ceil(Math.sqrt(width*height/18000)));
     for(let y=0;y<height;y+=step)for(let x=0;x<width;x+=step)if(pixels[(y*width+x)*4+3]>100)points.push({x,y,seed:((x*37+y*71)%997)/997});
     root.classList.add('vapour-ready');
   };
@@ -29,9 +35,9 @@ export function mountVapour({win,doc,root}){
     frame=0;if(disposed||!active||doc.hidden)return;
     if(!start)start=time;const elapsed=(time-start)/1000,amount=vaporAmount(elapsed);
     ctx.clearRect(0,0,width,height);ctx.fillStyle=color;
-    if(amount<.002){ctx.globalAlpha=1;ctx.font=font;ctx.textAlign='center';ctx.fillText(text.textContent,width/2,baseline,width-8);}
+    if(amount<.002){ctx.globalAlpha=1;ctx.textAlign='center';for(const line of layout){ctx.font=line.font;ctx.fillText(line.text,width/2,line.y,width*.96);}}
     else{
-      ctx.globalAlpha=Math.max(0,1-amount*2);ctx.font=font;ctx.textAlign='center';ctx.fillText(text.textContent,width/2,baseline,width-8);
+      ctx.globalAlpha=Math.max(0,1-amount*2);ctx.textAlign='center';for(const line of layout){ctx.font=line.font;ctx.fillText(line.text,width/2,line.y,width*.96);}
       for(const point of points){const p=vaporPosition(point,amount,elapsed);ctx.globalAlpha=p.alpha;ctx.fillRect(p.x,p.y,1.6,1.6);}
     }
     ctx.globalAlpha=1;frame=win.requestAnimationFrame(paint);

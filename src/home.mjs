@@ -8,7 +8,7 @@ export function renderHome(lang,{card,tags,arrow,down,ext,path}){
  <div class="hero-masthead"><p>${t('Desenvolvedora full-stack','Full-stack developer')}</p><p>${t('Silvânia, GO · Brasil','Silvânia, GO · Brazil')}</p></div>
  <div class="hero-artboard" data-parallax-layers>
   <div class="hero-watermark" data-parallax-layer="1" aria-hidden="true">${t('PORTFÓLIO','PORTFOLIO')}</div>
-  <div class="portrait-stage"><div class="portrait-depth" data-parallax-layer="2"><figure class="portrait-frame"><img src="/assets/anny-portrait-hd.webp" alt="Anny Gabrielly" width="1254" height="1254" fetchpriority="high" decoding="async"></figure></div></div>
+  <div class="portrait-stage"><div class="portrait-depth" data-parallax-layer="2"><figure class="portrait-frame"><img src="/assets/anny-portrait-cutout.webp" alt="Anny Gabrielly" width="1254" height="1254" fetchpriority="high" decoding="async"></figure></div></div>
   <div class="hero-copy" data-parallax-layer="3">
    <p class="hero-greeting">${t('Olá, eu sou','Hello, I’m')}</p>
    <h1 id="hero-title">Anny<br>Gabrielly<span class="name-period">.</span></h1>

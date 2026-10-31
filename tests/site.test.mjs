@@ -44,7 +44,7 @@ test('home reading order and localized direct CV downloads are preserved',()=>{
   assert.ok(ids.every(i=>i>=0),'all requested sections exist');
   assert.ok(ids.every((v,i)=>!i||v>ids[i-1]),'requested reading order');
   assert.match(html,/<h1[^>]*>[\s\S]*?Anny[\s\S]*?<\/h1>/);
-  assert.match(html,/<img[^>]*src="\/assets\/anny-portrait-hd.webp"[^>]*width="1254"[^>]*height="1254"/);
+  assert.match(html,/<img[^>]*src="\/assets\/anny-portrait-cutout.webp"[^>]*width="1254"[^>]*height="1254"/);
   assert.ok(html.includes(`href="/assets/${prefix?'Anny-Gabrielly-Resume-EN.pdf':'Anny-Gabrielly-Curriculo.pdf'}" download=`));
   assert.ok(html.includes(prefix?'>PORTFOLIO</div>':'>PORTFÓLIO</div>'));
   for(const id of ['sobre','formacao','projetos','impacto','skills','curriculo','contato'])assert.ok(html.includes(`data-nav="${id}"`));

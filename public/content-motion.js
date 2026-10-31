@@ -60,6 +60,16 @@ function prepareWriting({win,doc,gsap}, heading) {
 export function mountContentMotion({win,doc,gsap}) {
   if(!win.IntersectionObserver) return () => {};
   const cleanup = [], watch=(items,enter,leave)=>cleanup.push(observeVisibility(win,items,enter,leave));
+  const watermark=doc.querySelector?.('.hero-watermark');
+  if(watermark){
+    const original=watermark.innerHTML,letters=[...watermark.textContent];
+    watermark.replaceChildren(...letters.map(letter=>{const span=doc.createElement('span');span.className='spacing-letter';span.textContent=letter;return span;}));
+    const spans=[...watermark.children],timeline=gsap.timeline({paused:true});
+    spans.forEach((span,i)=>timeline.fromTo(span,{opacity:0,x:(i-(spans.length-1)/2)*18,y:15},{opacity:1,x:0,y:0,duration:.8,ease:'power3.out'},i*.055));
+    const play=()=>timeline.play(0),enter=()=>{if(doc.documentElement.classList.contains('intro-active'))doc.addEventListener('portfolio:intro-ready',play,{once:true});else play();};
+    watch([watermark],enter,()=>{doc.removeEventListener('portfolio:intro-ready',play);timeline.pause(0);});
+    cleanup.push(()=>{doc.removeEventListener('portfolio:intro-ready',play);timeline.kill();watermark.innerHTML=original;});
+  }
   const counters = [...doc.querySelectorAll('[data-count-to]')].filter(el=>!el.closest?.('.catalog-ruler'));
   const counts = new Map();
   for(const element of counters) {
