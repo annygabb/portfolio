@@ -17,3 +17,11 @@ test('the faster vapour cycle disperses and reforms within 2.3 seconds',async()=
  assert.ok(Math.abs(vaporAmount(1.45)-1)<1e-9);
  assert.equal(vaporAmount(2.3),0);assert.ok(Math.abs(vaporAmount(3.8+1.45)-1)<1e-9);
 });
+
+test('calligraphic ink fits its row including flourishes and descenders',async()=>{
+ const {fitVapourInk}=await import('../public/vapour.js');
+ const metrics={width:1348,row:427,index:1,left:410,right:580,ascent:270,descent:140};
+ const f=fitVapourInk(metrics);
+ assert.ok(f.x-metrics.left*f.scale>=0);assert.ok(f.x+metrics.right*f.scale<=metrics.width);
+ assert.ok(f.y-metrics.ascent*f.scale>=metrics.row);assert.ok(f.y+metrics.descent*f.scale<=metrics.row*2);
+});

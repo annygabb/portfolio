@@ -8,6 +8,10 @@ export function vaporPosition(point,amount,time){
   const drift=point.seed;
   return {x:point.x+amount*(Math.sin(drift*17+time)*24+drift*70),y:point.y-amount*(40+drift*85)+Math.sin(time*2+drift*9)*amount*12,alpha:Math.max(0,1-amount*.92)};
 }
+export function fitVapourInk({width,row,index,left,right,ascent,descent}){
+ const scale=Math.min(width*.92/Math.max(1,left+right),row*.78/Math.max(1,ascent+descent));
+ return {scale,x:width/2+(left-right)*scale/2,y:row*index+(row-(ascent+descent)*scale)/2+ascent*scale};
+}
 export function mountVapour({win,doc,root}){
   if(!root||!win.IntersectionObserver||win.matchMedia('(prefers-reduced-motion: reduce)').matches)return ()=>{};
   const canvas=root.querySelector('canvas'),text=root.querySelector('.closing-watermark'),ctx=canvas?.getContext('2d');
@@ -21,11 +25,12 @@ export function mountVapour({win,doc,root}){
     const names=[...text.querySelectorAll('span')];
     layout=names.length?names.map((name,i)=>{
       const row=height/names.length,size=row*.85;ctx.font=`${style.fontWeight} ${size}px ${style.fontFamily}`;
-      const fit=Math.min(size,size*(width*.94)/ctx.measureText(name.textContent).width);
-      return {text:name.textContent,font:`${style.fontWeight} ${fit}px ${style.fontFamily}`,y:row*i+row*.73};
+      ctx.textAlign='center';const metrics=ctx.measureText(name.textContent);
+      const fitted=fitVapourInk({width,row,index:i,left:metrics.actualBoundingBoxLeft,right:metrics.actualBoundingBoxRight,ascent:metrics.actualBoundingBoxAscent,descent:metrics.actualBoundingBoxDescent});
+      return {text:name.textContent,font:`${style.fontWeight} ${size*fitted.scale}px ${style.fontFamily}`,x:fitted.x,y:fitted.y};
     }):[{text:text.textContent,font,y:baseline}];
     const sample=doc.createElement('canvas');sample.width=width;sample.height=height;const ink=sample.getContext('2d');
-    ink.textAlign='center';for(const line of layout){ink.font=line.font;ink.fillText(line.text,width/2,line.y,width*.96);}
+    ink.textAlign='center';for(const line of layout){ink.font=line.font;ink.fillText(line.text,line.x??width/2,line.y,width*.96);}
     const pixels=ink.getImageData(0,0,width,height).data;points=[];
     const step=Math.max(3,Math.ceil(Math.sqrt(width*height/18000)));
     for(let y=0;y<height;y+=step)for(let x=0;x<width;x+=step)if(pixels[(y*width+x)*4+3]>100)points.push({x,y,seed:((x*37+y*71)%997)/997});
@@ -35,9 +40,9 @@ export function mountVapour({win,doc,root}){
     frame=0;if(disposed||!active||doc.hidden)return;
     if(!start)start=time;const elapsed=(time-start)/1000,amount=vaporAmount(elapsed);
     ctx.clearRect(0,0,width,height);ctx.fillStyle=color;
-    if(amount<.002){ctx.globalAlpha=1;ctx.textAlign='center';for(const line of layout){ctx.font=line.font;ctx.fillText(line.text,width/2,line.y,width*.96);}}
+    if(amount<.002){ctx.globalAlpha=1;ctx.textAlign='center';for(const line of layout){ctx.font=line.font;ctx.fillText(line.text,line.x??width/2,line.y,width*.96);}}
     else{
-      ctx.globalAlpha=Math.max(0,1-amount*2);ctx.textAlign='center';for(const line of layout){ctx.font=line.font;ctx.fillText(line.text,width/2,line.y,width*.96);}
+      ctx.globalAlpha=Math.max(0,1-amount*2);ctx.textAlign='center';for(const line of layout){ctx.font=line.font;ctx.fillText(line.text,line.x??width/2,line.y,width*.96);}
       for(const point of points){const p=vaporPosition(point,amount,elapsed);ctx.globalAlpha=p.alpha;ctx.fillRect(p.x,p.y,1.6,1.6);}
     }
     ctx.globalAlpha=1;frame=win.requestAnimationFrame(paint);
