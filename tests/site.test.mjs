@@ -1,3 +1,4 @@
+import {renderPage} from '../src/render.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
@@ -36,10 +37,10 @@ test('PageSpeed cover reserves its actual image aspect ratio',()=>{
  const tag=html.match(/<img[^>]+src="\/assets\/pagespeed-100.jpeg"[^>]*>/)[0];
  assert.match(tag,/width="1053" height="605"/);
 });
-test('home introduces Anny before work, skills and résumé in both languages',()=>{
+test('home reading order and localized direct CV downloads are preserved',()=>{
  for(const prefix of ['','en/']){
   const html=readFileSync(`dist/${prefix}index.html`,'utf8');
-  const ids=['sobre','perfil','formacao','projetos','impacto','skills','curriculo'].map(id=>html.indexOf(`id="${id}"`));
+  const ids=['sobre','perfil','formacao','projetos','impacto','skills'].map(id=>html.indexOf(`id="${id}"`));
   assert.ok(ids.every(i=>i>=0),'all requested sections exist');
   assert.ok(ids.every((v,i)=>!i||v>ids[i-1]),'requested reading order');
   assert.match(html,/<h1[^>]*>[\s\S]*?Anny[\s\S]*?<\/h1>/);
@@ -98,4 +99,23 @@ test('language switch shows only the other language on every equivalent route',(
 test('published pages version CSS and behavior assets so browsers request updated files',()=>{
  const html=readFileSync('dist/index.html','utf8');
  for(const file of ['styles.css','app.js','motion.js','section-navigation.js'])assert.ok(new RegExp(`/${file.replaceAll('.','\\.')}\\?v=[a-f0-9]{12}`).test(html));
+});
+
+test('CV downloads the localized PDF on every route without a résumé section',()=>{
+ for(const lang of ['pt','en']){
+  const html=renderPage({lang});
+  const filename=lang==='en'?'Anny-Gabrielly-Resume-EN.pdf':'Anny-Gabrielly-Curriculo.pdf';
+  const cvs=[...html.matchAll(/<a\b[^>]*>CV(?:<svg[\s\S]*?<\/svg>)?<\/a>/g)].map(x=>x[0]);
+  assert.equal(cvs.length,3);for(const cv of cvs){assert.ok(cv.includes(`href="/assets/${filename}"`));assert.ok(cv.includes(`download="${filename}"`));}
+  assert.ok(!html.includes('id="curriculo"'));assert.ok(!html.includes('href="#curriculo"'));
+ }
+});
+test('evidence dashboard retains each score without claiming a time trend',()=>{
+ const html=renderPage();assert.equal((html.match(/class="quality-metric"/g)||[]).length,4);
+ for(const values of ['98; registro 2, 100; registro 3, 100','100; registro 2, 100; registro 3, 94'])assert.ok(html.includes(values));
+ assert.ok(html.includes('não uma série temporal'));assert.ok(html.includes('class="quality-area"'));
+});
+test('website carousel leaves vertical scrolling available and keeps controls beside its cover',()=>{
+ const html=renderPage();assert.ok(!html.includes('data-lenis-prevent'));assert.ok(html.includes('class="carousel-viewport"'));
+ const css=readFileSync('public/styles.css','utf8');assert.ok(css.includes('.website-track::-webkit-scrollbar{display:none}'));assert.ok(css.includes('touch-action:pan-x pan-y'));
 });

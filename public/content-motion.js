@@ -71,19 +71,18 @@ export function mountContentMotion({win,doc,gsap}) {
   watch(counters,el=>counts.get(el).enter(),el=>counts.get(el).leave());
 
   const charts = new Map();
-  for(const chart of doc.querySelectorAll('.quality-lines')) {
-    const svg=chart.querySelector('svg'), lines=[...chart.querySelectorAll('.quality-line')], nodes=[...chart.querySelectorAll('.quality-node')], values=[...chart.querySelectorAll('.quality-value')], rows=[...chart.querySelectorAll('tbody tr')];
-    const originals=lines.map(line=>line.getAttribute('points')), cy=nodes.map(node=>node.getAttribute('cy'));
-    const styles=[...lines,...nodes,...values,...rows].map(rememberStyle), timeline=gsap.timeline({paused:true});
-    const states=lines.map(()=>({progress:0}));
-    const render=i=>{
-      const p=states[i].progress; lines[i].setAttribute('points',risingPoints(originals[i],p)); lines[i].style.strokeDasharray='none';
-      nodes.slice(i*4,i*4+4).forEach((node,j)=>{node.setAttribute('cy',String(210+(Number(cy[i*4+j])-210)*p));node.style.opacity=String(p);});
-      values.slice(i*4,i*4+4).forEach(value=>{value.style.opacity=String(p);}); if(rows[i])rows[i].style.opacity=String(p);
+  for(const chart of doc.querySelectorAll('.quality-metric')) {
+    const svg=chart.querySelector('svg'),line=chart.querySelector('.quality-line'),area=chart.querySelector('.quality-area'),nodes=[...chart.querySelectorAll('.quality-node')];
+    const original=line.getAttribute('points'),originalArea=area.getAttribute('d'),cy=nodes.map(n=>n.getAttribute('cy')),baseline=Number(chart.dataset.baseline)||130;
+    const state={progress:0},timeline=gsap.timeline({paused:true});
+    const render=()=>{
+      const points=risingPoints(original,state.progress,baseline);
+      line.setAttribute('points',points);area.setAttribute('d',`M32 ${baseline} L${points.replaceAll(' ',' L')} L288 ${baseline} Z`);
+      nodes.forEach((node,j)=>node.setAttribute('cy',String(baseline+(Number(cy[j])-baseline)*state.progress)));
     };
-    states.forEach((state,i)=>{render(i);timeline.to(state,{progress:1,duration:2.4,ease:'power2.out',onUpdate:()=>render(i)},i*.18);});
-    charts.set(svg,{enter:()=>timeline.play(0),leave:()=>{timeline.pause(0);states.forEach((state,i)=>{state.progress=0;render(i);});}});
-    cleanup.push(()=>{timeline.kill();lines.forEach((line,i)=>line.setAttribute('points',originals[i]));nodes.forEach((node,i)=>node.setAttribute('cy',cy[i]));styles.forEach(restore=>restore());});
+    render();timeline.to(state,{progress:1,duration:2,ease:'power2.out',onUpdate:render});
+    charts.set(svg,{enter:()=>timeline.play(0),leave:()=>{timeline.pause(0);state.progress=0;render();}});
+    cleanup.push(()=>{timeline.kill();line.setAttribute('points',original);area.setAttribute('d',originalArea);nodes.forEach((n,j)=>n.setAttribute('cy',cy[j]));});
   }
   watch([...charts.keys()],el=>charts.get(el).enter(),el=>charts.get(el).leave());
 
