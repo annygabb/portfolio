@@ -1,24 +1,28 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mountIntro,introPhase,projectIntroPoint} from '../public/intro.js';
+import {mountIntro} from '../public/intro.js';
 function fixture(){
- const classes=new Set(['intro-active']),events=[],timers=[],frames=[];
- const ctx={setTransform(){},clearRect(){},fillRect(){}},canvas={getContext:()=>ctx};
- const loader={querySelector:()=>canvas,style:{setProperty(){}}};
+ const classes=new Set(['intro-active']),events=[],timers=[],listeners=new Map();let paused=0,played=0;
+ const video={pause(){paused++;},play(){played++;return Promise.resolve();},addEventListener:(type,fn)=>listeners.set(type,fn),removeEventListener:type=>listeners.delete(type)};
+ const loader={querySelector:()=>video,classList:{add(){}}};
  const doc={documentElement:{classList:{contains:x=>classes.has(x),remove:x=>classes.delete(x)}},querySelector:()=>loader,dispatchEvent:e=>events.push(e.type)};
- const win={innerWidth:1363,innerHeight:936,requestAnimationFrame:fn=>{frames.push(fn);return frames.length},cancelAnimationFrame(){},setTimeout(fn,ms){timers.push({fn,ms});return timers.length},clearTimeout(){},addEventListener(){},removeEventListener(){},CustomEvent:class{constructor(type){this.type=type}}};
- return {classes,events,timers,frames,loader,doc,win};
+ const win={setTimeout(fn,ms){timers.push({fn,ms});return timers.length},clearTimeout(){},CustomEvent:class{constructor(type){this.type=type}}};
+ return {classes,events,timers,listeners,loader,doc,win,video,get paused(){return paused;},get played(){return played;}};
 }
-test('the 3D loader opens the page even if animation frames never arrive',()=>{
- const f=fixture(),cleanup=mountIntro(f);assert.equal(f.timers[0].ms,3000);f.timers[0].fn();assert.ok(!f.classes.has('intro-active'));assert.deepEqual(f.events,['portfolio:intro-ready']);cleanup();
+test('the reference video releases the hero once on playback completion',()=>{
+ const f=fixture(),cleanup=mountIntro(f);assert.equal(f.played,1);f.listeners.get('ended')();f.timers[0].fn();assert.equal(f.paused,1);assert.deepEqual(f.events,['portfolio:intro-ready']);assert.ok(!f.classes.has('intro-active'));cleanup();assert.equal(f.listeners.size,0);
 });
-test('sphere expansion reveals the full viewport and signals the hero once',()=>{
- const f=fixture(),cleanup=mountIntro(f);f.frames[0](0);f.frames[1](1800);assert.ok(f.loader.style.maskImage.includes('radial-gradient'));f.frames[2](2400);assert.ok(!f.classes.has('intro-active'));assert.deepEqual(f.events,['portfolio:intro-ready']);f.timers[0].fn();assert.equal(f.events.length,1);cleanup();
+test('a stalled video never blocks the portfolio indefinitely',()=>{
+ const f=fixture();mountIntro(f);assert.equal(f.timers[0].ms,6500);f.timers[0].fn();assert.ok(!f.classes.has('intro-active'));assert.equal(f.events.length,1);
 });
-test('particle perspective changes with depth and expansion reaches its full extent',()=>{
- const near=projectIntroPoint({x:.5,y:0,z:.8},0,100,1000,800),far=projectIntroPoint({x:.5,y:0,z:-.8},0,100,1000,800);
- assert.ok(near.scale>far.scale);assert.ok(near.x>far.x);assert.equal(introPhase(0),0);assert.equal(introPhase(1050),0);assert.equal(introPhase(2300),1);
+test('media errors and autoplay rejection open the content',async()=>{
+ const f=fixture();mountIntro(f);f.listeners.get('error')();assert.ok(!f.classes.has('intro-active'));
+ const blocked=fixture();blocked.video.play=()=>Promise.reject(new Error('autoplay blocked'));mountIntro(blocked);await Promise.resolve();assert.ok(!blocked.classes.has('intro-active'));assert.equal(blocked.events.length,1);
 });
-test('missing loader does not block case content',()=>{
+test('direct anchor arrivals do not download or play the loading video',()=>{
+ const f=fixture();f.classes.clear();mountIntro(f);assert.equal(f.played,0);
+});
+test('missing loader and missing media leave content accessible',()=>{
  const f=fixture();f.doc.querySelector=()=>null;assert.doesNotThrow(()=>mountIntro(f)());assert.ok(!f.classes.has('intro-active'));
+ const g=fixture();g.loader.querySelector=()=>null;mountIntro(g);assert.ok(!g.classes.has('intro-active'));
 });
