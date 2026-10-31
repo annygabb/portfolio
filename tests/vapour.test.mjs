@@ -10,3 +10,10 @@ test('reduced motion keeps the original footer text and skips canvas initializat
  const dispose=mountVapour({win:{IntersectionObserver:class{},matchMedia:()=>({matches:true})},doc:{},root});
  assert.equal(queried,false);assert.doesNotThrow(dispose);
 });
+
+test('the faster vapour cycle disperses and reforms within 2.3 seconds',async()=>{
+ const {vaporAmount}=await import('../public/vapour.js');
+ assert.equal(vaporAmount(0),0);assert.equal(vaporAmount(.6),0);
+ assert.ok(Math.abs(vaporAmount(1.45)-1)<1e-9);
+ assert.equal(vaporAmount(2.3),0);assert.ok(Math.abs(vaporAmount(3.8+1.45)-1)<1e-9);
+});

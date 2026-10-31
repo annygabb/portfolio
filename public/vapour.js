@@ -1,5 +1,9 @@
 /** Canvas particle typography inspired by the supplied Vapour Text reference.
  * Original implementation: no React runtime or third-party component code. */
+export function vaporAmount(elapsed){
+  const cycle=elapsed%3.8;
+  return cycle<.6?0:cycle<1.45?(cycle-.6)/.85:cycle<2.3?1-(cycle-1.45)/.85:0;
+}
 export function vaporPosition(point,amount,time){
   const drift=point.seed;
   return {x:point.x+amount*(Math.sin(drift*17+time)*24+drift*70),y:point.y-amount*(40+drift*85)+Math.sin(time*2+drift*9)*amount*12,alpha:Math.max(0,1-amount*.92)};
@@ -23,8 +27,7 @@ export function mountVapour({win,doc,root}){
   };
   const paint=time=>{
     frame=0;if(disposed||!active||doc.hidden)return;
-    if(!start)start=time;const elapsed=(time-start)/1000,cycle=elapsed%10;
-    const amount=cycle<3?0:cycle<5?(cycle-3)/2:cycle<7?1-(cycle-5)/2:0;
+    if(!start)start=time;const elapsed=(time-start)/1000,amount=vaporAmount(elapsed);
     ctx.clearRect(0,0,width,height);ctx.fillStyle=color;
     if(amount<.002){ctx.globalAlpha=1;ctx.font=font;ctx.textAlign='center';ctx.fillText(text.textContent,width/2,baseline,width-8);}
     else{
