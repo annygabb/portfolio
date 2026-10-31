@@ -5,6 +5,7 @@ import {renderPage} from '../src/render.mjs';
 import {projects,owner} from '../src/content.mjs';
 await rm('dist',{recursive:true,force:true}); await mkdir('dist',{recursive:true});
 await cp('public','dist',{recursive:true});
+for(const obsolete of ['assets/loading-numbers.mp4','vapour.js','footer-waves.js'])await rm('dist/'+obsolete,{force:true});
 // Keep source originals in Git; ship only the validated WOFF2 font variants.
 for(const font of ['anton','manrope','pinyon-script'])await rm(`dist/fonts/${font}.woff`,{force:true});
 await mkdir('dist/vendor',{recursive:true});
@@ -21,7 +22,7 @@ for(const [source,target] of [
 await writeFile('dist/vendor/THIRD-PARTY.txt','GSAP 3.15.0 and ScrollTrigger: Copyright GreenSock. Standard license https://gsap.com/standard-license. Original copyright headers preserved.\nLenis 1.3.27: MIT, darkroom.engineering. See Lenis-LICENSE.txt.\n');
 const contentHash=createHash('sha256').update(await readFile('public/content-motion.js')).digest('hex').slice(0,12);
 await writeFile('dist/motion.js',(await readFile('public/motion.js','utf8')).replace("'./content-motion.js'","'./content-motion.js?v="+contentHash+"'"));
-const assetRevisions=await Promise.all(['styles.css','app.js','theme-init.js','motion.js','section-navigation.js','carousel.js','vapour.js','intro.js','footer-waves.js'].map(async file=>[file,createHash('sha256').update(await readFile('dist/'+file)).digest('hex').slice(0,12)]));
+const assetRevisions=await Promise.all(['styles.css','app.js','theme-init.js','motion.js','section-navigation.js','carousel.js','intro.js','footer-trail.js'].map(async file=>[file,createHash('sha256').update(await readFile('dist/'+file)).digest('hex').slice(0,12)]));
 const routes=[];
 for(const lang of ['pt','en']) for(const project of [null,...projects]){
  const route=(lang==='en'?'/en/':'/')+(project?`cases/${project.slug}/`:'');

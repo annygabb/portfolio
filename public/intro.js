@@ -1,19 +1,17 @@
-/** The supplied numerical motion study, recoloured to the portfolio palette. */
+/** Resolution-independent brand entrance. Never waits for decorative media. */
 export function mountIntro({win,doc}){
  const root=doc.documentElement,loader=doc.querySelector('.site-intro');
- let deadline=0,disposed=false,finished=false;
- const video=loader?.querySelector('video');
+ let timer=0,disposed=false,finished=false;
  const finish=()=>{
-  if(disposed||finished)return;finished=true;win.clearTimeout(deadline);video?.pause();
+  if(disposed||finished)return;finished=true;win.clearTimeout(timer);
   loader?.classList.add('intro-leaving');root.classList.remove('intro-active');
   doc.dispatchEvent(new win.CustomEvent('portfolio:intro-ready'));
  };
- if(!loader||!root.classList.contains('intro-active')||!video){finish();return ()=>{};}
- // Playback errors, blocked autoplay and stalled networks always release the page.
- deadline=win.setTimeout(finish,6500);
- video.addEventListener('ended',finish);video.addEventListener('error',finish);
- video.play()?.catch(finish);
- return ()=>{disposed=true;win.clearTimeout(deadline);video.pause();video.removeEventListener('ended',finish);video.removeEventListener('error',finish);root.classList.remove('intro-active');};
+ if(!loader||!root.classList.contains('intro-active')){finish();return ()=>{};}
+ timer=win.setTimeout(finish,1650);
+ // Do not expose a fallback typeface while the local brand fonts arrive.
+ Promise.resolve(doc.fonts?.ready).then(()=>{if(!disposed&&!finished)loader.classList.add('intro-type-ready');},()=>finish());
+ return ()=>{disposed=true;win.clearTimeout(timer);root.classList.remove('intro-active');};
 }
 if(typeof window!=='undefined'&&typeof document!=='undefined'){
  const dispose=mountIntro({win:window,doc:document});window.addEventListener('pagehide',dispose);

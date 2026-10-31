@@ -296,3 +296,34 @@ html.smooth-motion{scroll-behavior:auto!important}
 .profile-answers summary{cursor:pointer;font-size:13px;font-weight:650}
 .profile-answers details p{font-size:13px;margin:14px 0 3px}
 @media(prefers-reduced-motion:reduce){.site-intro.depth-intro{display:none!important}}
+/* A crisp typographic entrance: real type, a short 3D reveal, no enlarged video. */
+.site-intro.depth-intro{background:#091425;color:#fff;perspective:1100px;transition:none}
+.intro-active .site-intro.depth-intro{display:grid;place-items:center}
+.intro-editorial{text-align:center;opacity:0;transform:translateY(18px) rotateX(12deg);transform-style:preserve-3d}
+.intro-type-ready .intro-editorial{animation:intro-brand-arrive .65s cubic-bezier(.16,1,.3,1) both}
+.intro-brand-lockup{display:flex;justify-content:center;align-items:baseline;gap:1px;transform:translateZ(40px);padding-inline:24px}
+.intro-brand-name{font-family:Manrope,sans-serif;font-weight:750;font-size:clamp(64px,10vw,126px);line-height:1;letter-spacing:-.085em}
+.intro-brand-signature{font-family:var(--script);font-size:clamp(101px,15vw,185px);line-height:.8;font-weight:400;letter-spacing:-.055em;color:#fff;margin-left:3px}
+.intro-specialty{font-size:9px;font-weight:500;letter-spacing:.24em;text-transform:uppercase;color:#b5c5da;margin:29px 0 25px}
+.intro-rule{height:1px;width:112px;margin:auto;background:#ffffff1c;overflow:hidden}
+.intro-rule>span{display:block;width:100%;height:100%;background:#e7edf6;transform-origin:left;transform:scaleX(0)}
+.intro-type-ready .intro-rule>span{animation:intro-rule-draw 1.1s cubic-bezier(.22,.6,.35,1) .12s both}
+.intro-edition{position:absolute;bottom:35px;left:0;right:0;text-align:center;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:#90a5c0}
+.site-intro.depth-intro.intro-leaving{display:grid;opacity:0;visibility:hidden;transform:translateY(-3%);transition:opacity .36s ease,transform .5s cubic-bezier(.22,.8,.3,1),visibility 0s .5s}
+@keyframes intro-brand-arrive{from{opacity:0;transform:translateY(18px) rotateX(12deg)}to{opacity:1;transform:translateY(0) rotateX(0)}}
+@keyframes intro-rule-draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* One calm gradient, with only a small trace of white following the cursor. */
+.minimal-footer{background:radial-gradient(ellipse at 12% 5%,#24466266,transparent 65%),linear-gradient(130deg,#12283e 0%,#091425 65%,#102337 100%)}
+.minimal-footer:before{display:none}
+.minimal-footer .minimal-shell{background:none}
+.footer-cursor-trail{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none}
+[data-theme="light"] .minimal-footer{background:radial-gradient(ellipse at 10% 0%,#fff8,transparent 70%),linear-gradient(130deg,#e5edf7,#d5e1ef 65%,#bdcfe2);color:#152c47;border-color:#7e98b73b}
+[data-theme="light"] .minimal-footer .wordmark{color:#152c47}
+[data-theme="light"] .minimal-footer .wordmark-script{color:#416c9f}
+[data-theme="light"] .minimal-footer .minimal-identity>p,[data-theme="light"] .minimal-footer .closing-nav li{color:#3d5571}
+[data-theme="light"] .minimal-footer .minimal-email,[data-theme="light"] .minimal-footer .closing-nav h3{color:#152c47}
+[data-theme="light"] .minimal-footer .minimal-location,[data-theme="light"] .minimal-footer .closing-bottom{color:#455f7c}
+[data-theme="light"] .minimal-footer .minimal-socials>a{color:#334f70;border-color:#617e9a55}
+[data-theme="light"] .minimal-footer .closing-bottom{border-color:#44617a33}
+[data-theme="light"] .minimal-footer a:hover,[data-theme="light"] .minimal-footer a:focus-visible{color:#174d91}
+@media(prefers-reduced-motion:reduce){.site-intro.depth-intro{display:none!important}.intro-editorial,.intro-rule>span{animation:none!important}}
