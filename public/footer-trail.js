@@ -1,4 +1,5 @@
-/** A short white ink trace follows the pointer, never the footer lettering. */
+/** A short theme-aware ink trace follows the pointer. */
+export const trailColor=theme=>theme==='light'?'36,85,214':'255,255,255';
 export function trailSegments(points,now){
  const segments=[];let remaining=44;
  for(let i=points.length-1;i>0&&remaining>0;i--){
@@ -23,7 +24,7 @@ export function mountFooterTrail({win,doc,root}){
   frame=0;if(disposed||doc.hidden)return;ctx.clearRect(0,0,width,height);
   points=points.filter(p=>time-p.time<=190);
   ctx.lineCap='round';ctx.lineJoin='round';
-  for(const segment of trailSegments(points,time)){ctx.strokeStyle=`rgba(255,255,255,${segment.alpha})`;ctx.lineWidth=segment.width;ctx.beginPath();ctx.moveTo(segment.x,segment.y);ctx.lineTo(segment.toX,segment.toY);ctx.stroke();}
+  for(const segment of trailSegments(points,time)){ctx.strokeStyle=`rgba(${trailColor(doc.documentElement?.dataset.theme)},${segment.alpha})`;ctx.lineWidth=segment.width;ctx.beginPath();ctx.moveTo(segment.x,segment.y);ctx.lineTo(segment.toX,segment.toY);ctx.stroke();}
   if(points.length>1)frame=win.requestAnimationFrame(paint);
  };
  const move=event=>{

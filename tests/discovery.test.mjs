@@ -4,7 +4,7 @@ import {readFileSync,existsSync} from 'node:fs';
 import {projects} from '../src/content.mjs';
 import {pageSchema,pageMetadata,markdownPage,llmsGuide} from '../src/discovery.mjs';
 import {renderPage} from '../src/render.mjs';
-import {trailSegments,mountFooterTrail} from '../public/footer-trail.js';
+import {trailSegments,mountFooterTrail,trailColor} from '../public/footer-trail.js';
 test('PT/EN pages expose matching canonical Markdown and author graph',()=>{
  for(const lang of ['pt','en'])for(const p of [null,...projects]){
   const html=renderPage({lang,project:p}),meta=pageMetadata(lang,p),schema=pageSchema(lang,p),md=markdownPage(lang,p);
@@ -29,7 +29,7 @@ test('the cursor trace stays under 44 pixels, fades quickly and respects reduced
 });
 test('footer has only gradient and small pointer trace, with no animated name or decorative video',()=>{
  for(const lang of ['pt','en']){
-  const html=renderPage({lang});assert.ok(!html.includes('vapour-signature'));assert.ok(!html.includes('vapour.js'));assert.ok(!html.includes('loading-numbers.mp4'));assert.ok(html.includes('/footer-trail.js'));assert.ok(html.includes('intro-brand-lockup'));
+  const html=renderPage({lang});assert.ok(!html.includes('vapour-signature'));assert.ok(!html.includes('vapour.js'));assert.ok(!html.includes('loading-numbers.mp4'));assert.ok(html.includes('/footer-trail.js'));assert.ok(html.includes('intro-numeric-canvas'));assert.ok(!html.includes('intro-brand-lockup'));
  }
  assert.ok(!existsSync('dist/assets/loading-numbers.mp4'));
 });
@@ -39,9 +39,12 @@ test('the footer draws thin white strokes only after pointer movement and cleans
  const canvas={getContext:()=>ctx,setAttribute(){},remove(){removed=true;}};
  const root={clientWidth:1200,clientHeight:850,prepend(){},getBoundingClientRect:()=>({left:0,top:0}),addEventListener:(n,fn)=>handlers.set(n,fn),removeEventListener:n=>handlers.delete(n)};
  const win={matchMedia:()=>({matches:false}),performance:{now:()=>now},requestAnimationFrame(fn){frames.push(fn);return frames.length},cancelAnimationFrame(){},addEventListener(){},removeEventListener(){}};
- const doc={createElement:()=>canvas,addEventListener(){},removeEventListener(){},hidden:false};
+ const doc={documentElement:{dataset:{theme:'light'}},createElement:()=>canvas,addEventListener(){},removeEventListener(){},hidden:false};
  const cleanup=mountFooterTrail({win,doc,root});assert.equal(frames.length,0);
  handlers.get('pointermove')({clientX:100,clientY:100,pointerType:'mouse'});now=10;handlers.get('pointermove')({clientX:130,clientY:100,pointerType:'mouse'});frames[0](10);
- assert.ok(strokes.length>0);assert.ok(strokes.every(s=>s.width<=2&&s.color.startsWith('rgba(255,255,255,')));
+ assert.ok(strokes.length>0);assert.ok(strokes.every(s=>s.width<=2&&s.color.startsWith('rgba(36,85,214,')));
+ doc.documentElement.dataset.theme='dark';now=20;handlers.get('pointermove')({clientX:135,clientY:102,pointerType:'mouse'});frames.at(-1)(20);assert.ok(strokes.at(-1).color.startsWith('rgba(255,255,255,'));
  cleanup();assert.equal(handlers.size,0);assert.ok(removed);
 });
+
+test('footer trail changes from brand blue in light to white in dark',()=>{assert.equal(trailColor('light'),'36,85,214');assert.equal(trailColor('dark'),'255,255,255');});

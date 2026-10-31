@@ -327,3 +327,8 @@ html.smooth-motion{scroll-behavior:auto!important}
 [data-theme="light"] .minimal-footer .closing-bottom{border-color:#44617a33}
 [data-theme="light"] .minimal-footer a:hover,[data-theme="light"] .minimal-footer a:focus-visible{color:#174d91}
 @media(prefers-reduced-motion:reduce){.site-intro.depth-intro{display:none!important}.intro-editorial,.intro-rule>span{animation:none!important}}
+/* Reference motion: native-resolution numerals, not an enlarged raster video. */
+.site-intro.depth-intro{background:#091425;perspective:none;transform:none}
+.intro-numeric-canvas{position:absolute;inset:0;display:block;width:100%;height:100%}
+.site-intro.depth-intro.intro-leaving{display:block;opacity:0;visibility:hidden;transform:none;transition:opacity .18s ease,visibility 0s .18s}
+.depth-intro .intro-edition{color:#b7c8df;opacity:var(--intro-label-opacity,1)}
